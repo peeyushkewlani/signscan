@@ -15,6 +15,7 @@ WORKDIR /app
 # Install Python dependencies first (Docker layer cache)
 COPY app/requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu && \
     pip install --no-cache-dir -r requirements.txt
 
 # Copy the entire app folder into the container
