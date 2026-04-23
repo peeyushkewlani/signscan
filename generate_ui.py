@@ -171,25 +171,6 @@ HTML_CONTENT = r"""<!DOCTYPE html>
                         <h2 class="text-3xl font-medium tracking-tight">Hi, <span id="profUsernameHeading" class="highlight">User</span></h2>
                         <p class="text-muted mt-1">Account: <span class="capitalize text-white" id="profTypeHeader"></span> &nbsp;•&nbsp; Joined: <span class="text-white" id="profJoinedHeader"></span></p>
                     </div>
-                    <div id="changePasswordSectionBtn">
-                        <button onclick="$('changePasswordModal').style.display = $('changePasswordModal').style.display === 'none' ? 'block' : 'none';" class="btn-outline text-sm">Change Password</button>
-                    </div>
-                </div>
-
-                <!-- Password Change Dropdown -->
-                <div id="changePasswordModal" class="glass-card mb-6 border border-primary/30" style="display: none;">
-                    <h3 class="text-lg font-medium mb-4">Update Password</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="form-group mb-0">
-                            <input type="password" id="cpOld" class="input-glass" placeholder="Current Password">
-                        </div>
-                        <div class="form-group mb-0">
-                            <input type="password" id="cpNew" class="input-glass" placeholder="New Password">
-                        </div>
-                    </div>
-                    <div id="cpError" class="alert-error mt-4" style="display: none;"></div>
-                    <div id="cpSuccess" class="alert-success mt-4" style="display: none;"></div>
-                    <button id="btnChangePassword" class="btn-primary mt-4">Save Password</button>
                 </div>
 
                 <!-- Tabs -->
@@ -724,46 +705,14 @@ function loadProfile() {
   $('profUsernameHeading').textContent = localStorage.getItem("username") || "User";
   $('profTypeHeader').textContent = localStorage.getItem("account_type") || "Local";
   $('profJoinedHeader').textContent = localStorage.getItem("join_date") || "Unknown";
-  
-  if(localStorage.getItem("account_type") === "google") {
-    $('changePasswordSectionBtn').style.display = 'none';
-    $('changePasswordModal').style.display = 'none';
-  } else {
-    $('changePasswordSectionBtn').style.display = 'block';
-  }
-}
-
-async function handleChangePassword() {
-  const o = $('cpOld').value, n = $('cpNew').value;
-  const err = $('cpError'), suc = $('cpSuccess'), btn = $('btnChangePassword');
-  err.style.display = 'none'; suc.style.display = 'none';
-  if(!o || !n) { err.textContent = "Fill all fields."; err.style.display = 'block'; return; }
-  
-  btn.textContent = "Updating..."; btn.disabled = true;
-  try {
-    const res = await fetch("/api/auth/change-password", {
-      method: "POST", headers:{
-        "Content-Type":"application/json",
-        "Authorization": `Bearer ${localStorage.getItem("auth_token")}`
-      },
-      body: JSON.stringify({old_password: o, new_password: n})
-    });
-    const data = await res.json();
-    if(res.ok) {
-      suc.textContent = "Password updated successfully."; suc.style.display = 'block';
-      $('cpOld').value = ''; $('cpNew').value = '';
-      setTimeout(() => $('changePasswordModal').style.display = 'none', 2000);
-    } else {
-      err.textContent = data.error || "Failed"; err.style.display = 'block';
-    }
-  } catch(e) { err.textContent = "Network error"; err.style.display = 'block'; }
-  btn.textContent = "Save Password"; btn.disabled = false;
 }
 
 // Scanner
 let selectedFile = null;
+let currentScanId = 0;
 
 window.resetScan = () => {
+    currentScanId++;
     selectedFile = null;
     $('uploadArea').style.display = 'block';
     $('previewContainer').style.display = 'none';
@@ -778,6 +727,7 @@ window.resetScan = () => {
 };
 
 function handleFileSelect(e) {
+  currentScanId++;
   const file = e.target.files ? e.target.files[0] : e.dataTransfer?.files[0];
   if(!file) return;
   selectedFile = file;
@@ -808,6 +758,8 @@ async function handleScan() {
   const btn = $('btnScan');
   btn.textContent = "Analyzing..."; btn.disabled = true;
   
+  const scanId = ++currentScanId;
+  
   // Show animated loader
   const loader = $('scanLoader');
   const loaderText = $('loaderText');
@@ -831,6 +783,11 @@ async function handleScan() {
             "Authorization": `Bearer ${localStorage.getItem("auth_token")}`
         }
     });
+    
+    if (scanId !== currentScanId) {
+        clearInterval(interval);
+        return; // User canceled or uploaded a new image while waiting
+    }
     
     if (res.status === 401) {
         alert("Session expired. Please log in again.");
@@ -857,18 +814,24 @@ async function handleScan() {
       $('scanResult').style.display = 'block';
     }
   } catch(e) { 
-      clearInterval(interval);
-      loader.style.display = 'none';
-      alert("Network error during scan."); 
+      if (scanId === currentScanId) {
+          clearInterval(interval);
+          loader.style.display = 'none';
+          alert("Network error during scan."); 
+      }
   }
-  btn.textContent = "Scan Image"; btn.disabled = false;
+  if (scanId === currentScanId) {
+      btn.textContent = "Scan Image"; btn.disabled = false;
+  }
 }
 
 // History
 function saveHistory(result, imgUrl) {
+  if (!currentUser) return;
+  const key = `scan_history_${currentUser}`;
   let hist = [];
   try {
-      hist = JSON.parse(localStorage.getItem("scan_history") || "[]");
+      hist = JSON.parse(localStorage.getItem(key) || "[]");
   } catch(e) {
       hist = [];
   }
@@ -883,13 +846,15 @@ function saveHistory(result, imgUrl) {
   
   hist.unshift(newScan);
   if(hist.length > 20) hist.pop();
-  localStorage.setItem("scan_history", JSON.stringify(hist));
+  localStorage.setItem(key, JSON.stringify(hist));
 }
 
 function loadHistory() {
+  if (!currentUser) return;
+  const key = `scan_history_${currentUser}`;
   let hist = [];
   try {
-      hist = JSON.parse(localStorage.getItem("scan_history") || "[]");
+      hist = JSON.parse(localStorage.getItem(key) || "[]");
   } catch(e) {
       hist = [];
   }
@@ -924,7 +889,6 @@ function loadHistory() {
 function bindEvents() {
   $('btnLoginAction').addEventListener('click', handleLogin);
   $('btnRegisterAction').addEventListener('click', handleRegister);
-  $('btnChangePassword').addEventListener('click', handleChangePassword);
   $('btnScan').addEventListener('click', handleScan);
   
   const drop = $('uploadArea');

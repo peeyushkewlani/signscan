@@ -310,7 +310,7 @@ class SignDetector:
             raise ValueError(f"Could not read image: {image_path}")
 
         # Resize image for much faster inference
-        max_dim = 1280
+        max_dim = 640
         height, width = image.shape[:2]
         if max(height, width) > max_dim:
             scale = max_dim / max(height, width)

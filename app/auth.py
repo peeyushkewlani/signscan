@@ -55,20 +55,7 @@ def login_user(username: str, password: str) -> dict:
             "account_type": "local", "join_date": u.get("join_date", "")}
 
 
-def change_password(token: str, old_pw: str, new_pw: str) -> dict:
-    ukey = _sessions.get(token)
-    if not ukey:
-        return {"error": "Not authenticated."}
-    u = _users.get(ukey)
-    if not u or u.get("provider") != "local":
-        return {"error": "Password change is only for local accounts."}
-    if u.get("pw_hash") != _hash(old_pw):
-        return {"error": "Current password is incorrect."}
-    err = _validate_password(new_pw)
-    if err:
-        return {"error": err}
-    u["pw_hash"] = _hash(new_pw)
-    return {"ok": True}
+
 
 
 # ── Google OAuth ──────────────────────────────────────────────────────────

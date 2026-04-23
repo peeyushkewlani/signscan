@@ -118,18 +118,7 @@ async def api_logout(authorization: str = Header(default="")) -> JSONResponse:
     return JSONResponse({"message": "Logged out successfully."})
 
 
-class ChangePasswordBody(BaseModel):
-    old_password: str
-    new_password: str
 
-
-@app.post("/api/auth/change-password")
-async def api_change_password(body: ChangePasswordBody, authorization: str = Header(default="")) -> JSONResponse:
-    token  = authorization.removeprefix("Bearer ").strip()
-    result = change_password(token, body.old_password, body.new_password)
-    if "error" in result:
-        raise HTTPException(400, result["error"])
-    return JSONResponse({"message": "Password updated successfully."})
 
 
 @app.get("/api/auth/me")

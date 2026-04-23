@@ -169,25 +169,6 @@
                         <h2 class="text-3xl font-medium tracking-tight">Hi, <span id="profUsernameHeading" class="highlight">User</span></h2>
                         <p class="text-muted mt-1">Account: <span class="capitalize text-white" id="profTypeHeader"></span> &nbsp;•&nbsp; Joined: <span class="text-white" id="profJoinedHeader"></span></p>
                     </div>
-                    <div id="changePasswordSectionBtn">
-                        <button onclick="$('changePasswordModal').style.display = $('changePasswordModal').style.display === 'none' ? 'block' : 'none';" class="btn-outline text-sm">Change Password</button>
-                    </div>
-                </div>
-
-                <!-- Password Change Dropdown -->
-                <div id="changePasswordModal" class="glass-card mb-6 border border-primary/30" style="display: none;">
-                    <h3 class="text-lg font-medium mb-4">Update Password</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="form-group mb-0">
-                            <input type="password" id="cpOld" class="input-glass" placeholder="Current Password">
-                        </div>
-                        <div class="form-group mb-0">
-                            <input type="password" id="cpNew" class="input-glass" placeholder="New Password">
-                        </div>
-                    </div>
-                    <div id="cpError" class="alert-error mt-4" style="display: none;"></div>
-                    <div id="cpSuccess" class="alert-success mt-4" style="display: none;"></div>
-                    <button id="btnChangePassword" class="btn-primary mt-4">Save Password</button>
                 </div>
 
                 <!-- Tabs -->
