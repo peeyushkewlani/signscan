@@ -1,5 +1,5 @@
 
-import { Renderer, Program, Triangle, Mesh } from 'https://cdn.jsdelivr.net/npm/ogl@1.0.11/dist/ogl.mjs';
+import { Renderer, Program, Triangle, Mesh } from 'https://esm.sh/ogl@1.0.11';
 
 // ── WebGL LightRays Component (Vanilla JS Port) ──────────────────────────
 class LightRays {
