@@ -1,17 +1,15 @@
 """Auth helpers — in-memory user store + Google OAuth."""
 from __future__ import annotations
-import hashlib
-import os
-import re
-import secrets
+import hashlib, os, re, secrets
+from datetime import datetime
 
-_users: dict[str, dict] = {}    # internal_key -> {display, provider, pw_hash?}
-_sessions: dict[str, str] = {}  # token -> internal_key
+_users:    dict[str, dict] = {}
+_sessions: dict[str, str]  = {}
 
 GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
 
 _DIGIT   = re.compile(r'\d')
-_SPECIAL = re.compile(r'[!@#$%^&*()|\-_=+\[\]{};\'",./<>?\\`~]')
+_SPECIAL = re.compile(r'[!@#$%^&*()\-_=+\[\]{}|;:\'",.<>?/\\`~]')
 
 
 def _hash(pw: str) -> str:
@@ -19,13 +17,12 @@ def _hash(pw: str) -> str:
 
 
 def _validate_password(pw: str) -> str | None:
-    """Return an error string, or None if the password is valid."""
     if len(pw) < 8:
         return "Password must be at least 8 characters long."
     if not _DIGIT.search(pw):
         return "Password must contain at least one number (0-9)."
     if not _SPECIAL.search(pw):
-        return "Password must contain at least one special character (!@#$%^&* …)."
+        return "Password must contain at least one special character (!@#$%…)."
     return None
 
 
@@ -34,25 +31,44 @@ def register_user(username: str, password: str) -> dict:
     username = username.strip().lower()
     if len(username) < 3:
         return {"error": "Username must be at least 3 characters."}
-    pw_err = _validate_password(password)
-    if pw_err:
-        return {"error": pw_err}
+    err = _validate_password(password)
+    if err:
+        return {"error": err}
     if username in _users:
-        return {"error": "That username is already taken. Please choose another."}
-    _users[username] = {"display": username, "provider": "local", "pw_hash": _hash(password)}
+        return {"error": "That username is already taken."}
+    _users[username] = {
+        "display": username, "provider": "local",
+        "pw_hash": _hash(password),
+        "join_date": datetime.now().strftime("%B %Y"),
+    }
     return {"ok": True}
 
 
 def login_user(username: str, password: str) -> dict:
     username = username.strip().lower()
-    rec = _users.get(username)
-    if not rec or rec.get("provider") != "local":
-        return {"error": "Incorrect username or password."}
-    if rec.get("pw_hash") != _hash(password):
+    u = _users.get(username)
+    if not u or u.get("provider") != "local" or u.get("pw_hash") != _hash(password):
         return {"error": "Incorrect username or password."}
     tok = secrets.token_urlsafe(32)
     _sessions[tok] = username
-    return {"token": tok, "username": rec["display"]}
+    return {"token": tok, "username": u["display"],
+            "account_type": "local", "join_date": u.get("join_date", "")}
+
+
+def change_password(token: str, old_pw: str, new_pw: str) -> dict:
+    ukey = _sessions.get(token)
+    if not ukey:
+        return {"error": "Not authenticated."}
+    u = _users.get(ukey)
+    if not u or u.get("provider") != "local":
+        return {"error": "Password change is only for local accounts."}
+    if u.get("pw_hash") != _hash(old_pw):
+        return {"error": "Current password is incorrect."}
+    err = _validate_password(new_pw)
+    if err:
+        return {"error": err}
+    u["pw_hash"] = _hash(new_pw)
+    return {"ok": True}
 
 
 # ── Google OAuth ──────────────────────────────────────────────────────────
@@ -62,20 +78,19 @@ def google_login(credential: str) -> dict:
     try:
         from google.oauth2 import id_token
         from google.auth.transport import requests as g_req
-        idinfo = id_token.verify_oauth2_token(
-            credential, g_req.Request(), GOOGLE_CLIENT_ID,
-            clock_skew_in_seconds=10,
-        )
-        email   = idinfo.get("email", "")
-        display = idinfo.get("name") or idinfo.get("given_name") or email.split("@")[0]
-        ukey    = f"g_{email}"  # 'g_' prefix avoids collision with local users
+        info    = id_token.verify_oauth2_token(credential, g_req.Request(), GOOGLE_CLIENT_ID, clock_skew_in_seconds=10)
+        email   = info.get("email", "")
+        display = info.get("name") or info.get("given_name") or email.split("@")[0]
+        ukey    = f"g_{email}"
         if ukey not in _users:
-            _users[ukey] = {"display": display, "provider": "google"}
+            _users[ukey] = {"display": display, "provider": "google",
+                            "join_date": datetime.now().strftime("%B %Y")}
         tok = secrets.token_urlsafe(32)
         _sessions[tok] = ukey
-        return {"token": tok, "username": display}
+        return {"token": tok, "username": display,
+                "account_type": "google", "join_date": _users[ukey].get("join_date", "")}
     except Exception as exc:
-        return {"error": f"Google sign-in failed. Please try again. ({exc})"}
+        return {"error": f"Google sign-in failed. ({exc})"}
 
 
 # ── Session helpers ───────────────────────────────────────────────────────
@@ -85,7 +100,6 @@ def logout_user(authorization: str) -> None:
 
 
 def get_user_from_token(authorization: str) -> str | None:
-    """Returns display name for valid token, else None."""
     if not authorization.startswith("Bearer "):
         return None
     ukey = _sessions.get(authorization[7:])
