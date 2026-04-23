@@ -13,7 +13,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from ai_pipeline import CLASS_NAMES, SignDetector
-from auth import GOOGLE_CLIENT_ID, change_password, get_user_from_token, google_login, login_user, logout_user, register_user
+from auth import GOOGLE_CLIENT_ID, get_user_from_token, google_login, login_user, logout_user, register_user
 
 BASE_DIR   = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
