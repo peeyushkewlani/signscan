@@ -43,7 +43,7 @@
                     Interactive, lightweight, and blazing fast AI.
                 </p>
                 <div class="hero-buttons">
-                    <button onclick="navigate('auth')" class="btn-primary">Get Started</button>
+                    <button id="heroActionBtn" onclick="navigate('auth')" class="btn-primary">Get Started</button>
                     <button onclick="navigate('about')" class="btn-outline">Learn More</button>
                 </div>
             </div>
@@ -201,20 +201,44 @@
                     <div id="tab-scan" class="app-tab active">
                         <div class="glass-card">
                             <h2 class="text-2xl font-medium mb-4">Analyze Traffic Sign</h2>
-                            <div class="upload-area" id="uploadArea">
-                                <p class="text-muted">Drag & drop image here or <span class="highlight cursor-pointer" id="btnBrowse">browse</span></p>
-                                <input type="file" id="fileInput" class="hidden" accept="image/*">
-                            </div>
-                            <div id="previewContainer" class="hidden mt-4 text-center">
-                                <img id="imagePreview" class="max-w-md w-full mx-auto rounded-lg border border-white/10" src="" alt="Preview">
-                                <button id="btnScan" class="btn-primary mt-4 px-8">Scan Image</button>
-                                <button onclick="resetScan()" class="btn-outline mt-4 px-8 ml-2">Cancel</button>
-                            </div>
-                            <div id="scanResult" class="mt-6 hidden">
-                                <div class="glass-card bg-white/5 border-primary/30 text-center">
-                                    <p class="text-sm text-muted uppercase tracking-widest mb-1">Detection Result</p>
-                                    <h3 class="text-3xl text-primary font-medium" id="resClass">Stop Sign</h3>
-                                    <p class="text-muted mt-2" id="resConf">Confidence: 98%</p>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <!-- Left Panel: Upload or Preview -->
+                                <div class="upload-panel flex flex-col justify-center">
+                                    <div class="upload-area" id="uploadArea">
+                                        <p class="text-muted">Drag & drop image here or <span class="highlight cursor-pointer" id="btnBrowse">browse</span></p>
+                                        <input type="file" id="fileInput" class="hidden" accept="image/*">
+                                    </div>
+                                    <div id="previewContainer" class="hidden text-center relative overflow-hidden rounded-xl">
+                                        <img id="imagePreview" class="w-full h-64 object-cover rounded-xl border border-white/10" src="" alt="Preview">
+                                        
+                                        <!-- Animated Loader Overlay -->
+                                        <div id="scanLoader" class="absolute inset-0 bg-black/80 backdrop-blur-sm hidden flex-col items-center justify-center rounded-xl z-10 transition-opacity">
+                                            <div class="loader-spinner"></div>
+                                            <p id="loaderText" class="mt-4 text-primary font-medium tracking-wide">Scanning your sign...</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="scanActions" class="hidden mt-4 flex gap-4">
+                                        <button id="btnScan" class="btn-primary flex-1">Scan Image</button>
+                                        <button onclick="resetScan()" class="btn-outline flex-1">Cancel</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Right Panel: Results -->
+                                <div class="results-panel flex flex-col justify-center">
+                                    <div id="scanResult" class="hidden transition-all">
+                                        <div class="glass-card bg-white/5 border-primary/30 text-center py-8">
+                                            <p class="text-sm text-muted uppercase tracking-widest mb-2">Detection Result</p>
+                                            <h3 class="text-3xl text-primary font-medium" id="resClass">Stop Sign</h3>
+                                            <div class="divider mx-auto my-4 w-16"></div>
+                                            <p class="text-muted text-lg" id="resConf">Confidence: 98%</p>
+                                        </div>
+                                    </div>
+                                    <div id="scanPlaceholder" class="text-center text-muted p-8">
+                                        <svg class="w-16 h-16 mx-auto mb-4 opacity-20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                                        <p>Upload an image to see results here</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -172,13 +172,24 @@ function checkToken() {
     $('navLoginBtn').classList.add('hidden');
     $('navLogoutBtn').classList.remove('hidden');
     $('navDashboardBtn').classList.remove('hidden');
-    $('navUsernameDisplay').textContent = u; // Replace 'Dashboard' with Username
+    $('navUsernameDisplay').textContent = u;
+    
+    // Auth Flow: update hero button to go to dashboard
+    if ($('heroActionBtn')) {
+        $('heroActionBtn').textContent = 'Go to Dashboard';
+        $('heroActionBtn').onclick = () => navigate('app');
+    }
   } else {
     currentUser = null;
     $('navLoginBtn').classList.remove('hidden');
     $('navLogoutBtn').classList.add('hidden');
     $('navDashboardBtn').classList.add('hidden');
     $('navUsernameDisplay').textContent = 'Dashboard';
+    
+    if ($('heroActionBtn')) {
+        $('heroActionBtn').textContent = 'Get Started';
+        $('heroActionBtn').onclick = () => navigate('auth');
+    }
   }
 }
 
@@ -289,7 +300,9 @@ window.resetScan = () => {
     selectedFile = null;
     $('uploadArea').classList.remove('hidden');
     $('previewContainer').classList.add('hidden');
+    $('scanActions').classList.add('hidden');
     $('scanResult').classList.add('hidden');
+    $('scanPlaceholder').classList.remove('hidden');
     $('fileInput').value = '';
 };
 
@@ -299,22 +312,44 @@ function handleFileSelect(e) {
   selectedFile = file;
   $('uploadArea').classList.add('hidden');
   $('previewContainer').classList.remove('hidden');
+  $('scanActions').classList.remove('hidden');
   $('scanResult').classList.add('hidden');
+  $('scanPlaceholder').classList.remove('hidden');
+  
   const reader = new FileReader();
   reader.onload = e => $('imagePreview').src = e.target.result;
   reader.readAsDataURL(file);
 }
+
+const loaderTexts = [
+    "Reading your photo...",
+    "Detecting the sign...",
+    "Reading visible text...",
+    "Preparing your result..."
+];
 
 async function handleScan() {
   if(!selectedFile) return;
   const btn = $('btnScan');
   btn.textContent = "Analyzing..."; btn.disabled = true;
   
+  // Show animated loader
+  const loader = $('scanLoader');
+  const loaderText = $('loaderText');
+  loader.classList.remove('hidden');
+  loader.classList.add('flex');
+  
+  let textIndex = 0;
+  loaderText.textContent = loaderTexts[0];
+  const interval = setInterval(() => {
+      textIndex = (textIndex + 1) % loaderTexts.length;
+      loaderText.textContent = loaderTexts[textIndex];
+  }, 800);
+  
   const formData = new FormData();
   formData.append("file", selectedFile);
   
   try {
-    // FIX: ADDED AUTHORIZATION HEADER
     const res = await fetch("/api/analyze", { 
         method: "POST", 
         body: formData,
@@ -331,7 +366,12 @@ async function handleScan() {
     
     const data = await res.json();
     
-    // FIX: LOOK FOR 'detections' instead of 'predictions'
+    // Stop loader
+    clearInterval(interval);
+    loader.classList.add('hidden');
+    loader.classList.remove('flex');
+    $('scanPlaceholder').classList.add('hidden');
+    
     if(res.ok && data.detections && data.detections.length > 0) {
       const best = data.detections[0];
       $('resClass').textContent = best.class_name;
@@ -344,6 +384,9 @@ async function handleScan() {
       $('scanResult').classList.remove('hidden');
     }
   } catch(e) { 
+      clearInterval(interval);
+      loader.classList.add('hidden');
+      loader.classList.remove('flex');
       alert("Network error during scan."); 
   }
   btn.textContent = "Scan Image"; btn.disabled = false;
@@ -351,28 +394,46 @@ async function handleScan() {
 
 // History
 function saveHistory(result, imgUrl) {
-  let hist = JSON.parse(localStorage.getItem("scan_history") || "[]");
+  let hist = [];
+  try {
+      hist = JSON.parse(localStorage.getItem("scan_history") || "[]");
+  } catch(e) {
+      hist = [];
+  }
   hist.unshift({ date: new Date().toLocaleString(), result, imgUrl });
   if(hist.length > 10) hist.pop();
   localStorage.setItem("scan_history", JSON.stringify(hist));
 }
 
 function loadHistory() {
-  const hist = JSON.parse(localStorage.getItem("scan_history") || "[]");
+  let hist = [];
+  try {
+      hist = JSON.parse(localStorage.getItem("scan_history") || "[]");
+  } catch(e) {
+      hist = [];
+  }
   const list = $('historyList');
-  if(hist.length === 0) {
+  if(!hist || hist.length === 0) {
     list.innerHTML = '<p class="text-muted text-center py-8">No recent scans found.</p>';
     return;
   }
-  list.innerHTML = hist.map(h => `
-    <div class="glass-card flex gap-4 p-4 items-center mb-4 border border-white/5 bg-white/5">
-      <img src="${h.imgUrl}" class="w-20 h-20 object-cover rounded-md border border-white/10">
-      <div>
-        <h4 class="text-primary font-medium text-xl">${h.result.class_name}</h4>
-        <p class="text-muted text-sm mt-1">${(h.result.confidence * 100).toFixed(1)}% confidence • ${h.date}</p>
-      </div>
-    </div>
-  `).join('');
+  
+  let html = '';
+  hist.forEach(h => {
+      if (!h || !h.result) return;
+      const conf = h.result.confidence ? (h.result.confidence * 100).toFixed(1) : '0.0';
+      const name = h.result.class_name || 'Unknown';
+      html += `
+        <div class="glass-card flex gap-4 p-4 items-center mb-4 border border-white/5 bg-white/5">
+          <img src="${h.imgUrl}" class="w-20 h-20 object-cover rounded-md border border-white/10">
+          <div>
+            <h4 class="text-primary font-medium text-xl">${name}</h4>
+            <p class="text-muted text-sm mt-1">${conf}% confidence • ${h.date}</p>
+          </div>
+        </div>
+      `;
+  });
+  list.innerHTML = html || '<p class="text-muted text-center py-8">No valid scans found.</p>';
 }
 
 // Events Setup
@@ -387,7 +448,6 @@ function bindEvents() {
   drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
   drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('dragover'); handleFileSelect(e); });
   
-  // Also make the whole upload area clickable
   $('uploadArea').addEventListener('click', () => $('fileInput').click());
   $('fileInput').addEventListener('change', handleFileSelect);
 }

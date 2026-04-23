@@ -45,7 +45,7 @@ HTML_CONTENT = r"""<!DOCTYPE html>
                     Interactive, lightweight, and blazing fast AI.
                 </p>
                 <div class="hero-buttons">
-                    <button onclick="navigate('auth')" class="btn-primary">Get Started</button>
+                    <button id="heroActionBtn" onclick="navigate('auth')" class="btn-primary">Get Started</button>
                     <button onclick="navigate('about')" class="btn-outline">Learn More</button>
                 </div>
             </div>
@@ -203,20 +203,44 @@ HTML_CONTENT = r"""<!DOCTYPE html>
                     <div id="tab-scan" class="app-tab active">
                         <div class="glass-card">
                             <h2 class="text-2xl font-medium mb-4">Analyze Traffic Sign</h2>
-                            <div class="upload-area" id="uploadArea">
-                                <p class="text-muted">Drag & drop image here or <span class="highlight cursor-pointer" id="btnBrowse">browse</span></p>
-                                <input type="file" id="fileInput" class="hidden" accept="image/*">
-                            </div>
-                            <div id="previewContainer" class="hidden mt-4 text-center">
-                                <img id="imagePreview" class="max-w-md w-full mx-auto rounded-lg border border-white/10" src="" alt="Preview">
-                                <button id="btnScan" class="btn-primary mt-4 px-8">Scan Image</button>
-                                <button onclick="resetScan()" class="btn-outline mt-4 px-8 ml-2">Cancel</button>
-                            </div>
-                            <div id="scanResult" class="mt-6 hidden">
-                                <div class="glass-card bg-white/5 border-primary/30 text-center">
-                                    <p class="text-sm text-muted uppercase tracking-widest mb-1">Detection Result</p>
-                                    <h3 class="text-3xl text-primary font-medium" id="resClass">Stop Sign</h3>
-                                    <p class="text-muted mt-2" id="resConf">Confidence: 98%</p>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <!-- Left Panel: Upload or Preview -->
+                                <div class="upload-panel flex flex-col justify-center">
+                                    <div class="upload-area" id="uploadArea">
+                                        <p class="text-muted">Drag & drop image here or <span class="highlight cursor-pointer" id="btnBrowse">browse</span></p>
+                                        <input type="file" id="fileInput" class="hidden" accept="image/*">
+                                    </div>
+                                    <div id="previewContainer" class="hidden text-center relative overflow-hidden rounded-xl">
+                                        <img id="imagePreview" class="w-full h-64 object-cover rounded-xl border border-white/10" src="" alt="Preview">
+                                        
+                                        <!-- Animated Loader Overlay -->
+                                        <div id="scanLoader" class="absolute inset-0 bg-black/80 backdrop-blur-sm hidden flex-col items-center justify-center rounded-xl z-10 transition-opacity">
+                                            <div class="loader-spinner"></div>
+                                            <p id="loaderText" class="mt-4 text-primary font-medium tracking-wide">Scanning your sign...</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="scanActions" class="hidden mt-4 flex gap-4">
+                                        <button id="btnScan" class="btn-primary flex-1">Scan Image</button>
+                                        <button onclick="resetScan()" class="btn-outline flex-1">Cancel</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Right Panel: Results -->
+                                <div class="results-panel flex flex-col justify-center">
+                                    <div id="scanResult" class="hidden transition-all">
+                                        <div class="glass-card bg-white/5 border-primary/30 text-center py-8">
+                                            <p class="text-sm text-muted uppercase tracking-widest mb-2">Detection Result</p>
+                                            <h3 class="text-3xl text-primary font-medium" id="resClass">Stop Sign</h3>
+                                            <div class="divider mx-auto my-4 w-16"></div>
+                                            <p class="text-muted text-lg" id="resConf">Confidence: 98%</p>
+                                        </div>
+                                    </div>
+                                    <div id="scanPlaceholder" class="text-center text-muted p-8">
+                                        <svg class="w-16 h-16 mx-auto mb-4 opacity-20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                                        <p>Upload an image to see results here</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -311,19 +335,30 @@ button { font-family: inherit; cursor: pointer; border: none; outline: none; }
 .screen.active { display: block; }
 .hidden { display: none !important; }
 .flex { display: flex; }
+.flex-col { flex-direction: column; }
 .flex-wrap { flex-wrap: wrap; }
 .justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
 .items-center { align-items: center; }
 .gap-4 { gap: 16px; }
+.gap-8 { gap: 32px; }
 .w-full { width: 100%; }
+.h-64 { height: 16rem; }
 .mt-1 { margin-top: 4px; }
 .mt-2 { margin-top: 8px; }
 .mt-4 { margin-top: 16px; }
 .mb-2 { margin-bottom: 8px; }
 .mb-4 { margin-bottom: 16px; }
 .mb-6 { margin-bottom: 24px; }
+.my-4 { margin-top: 16px; margin-bottom: 16px; }
+.py-8 { padding-top: 32px; padding-bottom: 32px; }
+.p-8 { padding: 32px; }
 .text-center { text-align: center; }
 .text-sm { font-size: 14px; }
+.text-lg { font-size: 18px; }
+.text-xl { font-size: 20px; }
+.text-2xl { font-size: 24px; }
+.text-3xl { font-size: 30px; }
 .text-muted { color: var(--text-muted); }
 .capitalize { text-transform: capitalize; }
 .uppercase { text-transform: uppercase; }
@@ -331,6 +366,13 @@ button { font-family: inherit; cursor: pointer; border: none; outline: none; }
 .space-y-4 > * + * { margin-top: 16px; }
 .grid { display: grid; }
 .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.flex-1 { flex: 1; }
+.object-cover { object-fit: cover; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.w-16 { width: 4rem; }
+.h-16 { height: 4rem; }
+.w-20 { width: 5rem; }
+.h-20 { height: 5rem; }
 
 /* Typography */
 .hero-section { text-align: center; padding: 80px 24px; max-width: 800px; margin: 0 auto; }
@@ -371,7 +413,7 @@ button { font-family: inherit; cursor: pointer; border: none; outline: none; }
 .auth-divider span { padding: 0 16px; }
 
 /* Dashboard */
-.dashboard-layout { max-width: 900px; margin: 40px auto; padding: 0 24px; }
+.dashboard-layout { max-width: 1000px; margin: 40px auto; padding: 0 24px; }
 .tab-btn { background: var(--glass-bg); color: var(--text-muted); border: 1px solid var(--glass-border); border-radius: 12px; font-weight: 500; transition: all 0.2s; }
 .tab-btn:hover { background: rgba(255,255,255,0.05); color: white; }
 .tab-btn.active { background: var(--primary-dim); color: var(--primary); border-color: rgba(0, 255, 255, 0.3); }
@@ -379,6 +421,26 @@ button { font-family: inherit; cursor: pointer; border: none; outline: none; }
 .app-tab.active { display: block; }
 .upload-area { border: 2px dashed var(--glass-border); border-radius: 16px; padding: 48px 24px; text-align: center; transition: border-color 0.2s; cursor: pointer; }
 .upload-area:hover, .upload-area.dragover { border-color: var(--primary); background: rgba(0,255,255,0.02); }
+
+/* Animated Loader */
+.loader-spinner {
+    width: 48px; height: 48px;
+    border: 3px solid rgba(0, 255, 255, 0.2);
+    border-radius: 50%;
+    border-top-color: var(--primary);
+    animation: spin 1s ease-in-out infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.absolute { position: absolute; }
+.inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+.bg-black\/80 { background-color: rgba(0, 0, 0, 0.8); }
+.backdrop-blur-sm { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+.z-10 { z-index: 10; }
+.rounded-xl { border-radius: 16px; }
+.overflow-hidden { overflow: hidden; }
+.relative { position: relative; }
+.transition-all { transition: all 0.3s ease; }
+.transition-opacity { transition: opacity 0.3s ease; }
 
 /* Animations */
 .fade-up { animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -569,13 +631,24 @@ function checkToken() {
     $('navLoginBtn').classList.add('hidden');
     $('navLogoutBtn').classList.remove('hidden');
     $('navDashboardBtn').classList.remove('hidden');
-    $('navUsernameDisplay').textContent = u; // Replace 'Dashboard' with Username
+    $('navUsernameDisplay').textContent = u;
+    
+    // Auth Flow: update hero button to go to dashboard
+    if ($('heroActionBtn')) {
+        $('heroActionBtn').textContent = 'Go to Dashboard';
+        $('heroActionBtn').onclick = () => navigate('app');
+    }
   } else {
     currentUser = null;
     $('navLoginBtn').classList.remove('hidden');
     $('navLogoutBtn').classList.add('hidden');
     $('navDashboardBtn').classList.add('hidden');
     $('navUsernameDisplay').textContent = 'Dashboard';
+    
+    if ($('heroActionBtn')) {
+        $('heroActionBtn').textContent = 'Get Started';
+        $('heroActionBtn').onclick = () => navigate('auth');
+    }
   }
 }
 
@@ -686,7 +759,9 @@ window.resetScan = () => {
     selectedFile = null;
     $('uploadArea').classList.remove('hidden');
     $('previewContainer').classList.add('hidden');
+    $('scanActions').classList.add('hidden');
     $('scanResult').classList.add('hidden');
+    $('scanPlaceholder').classList.remove('hidden');
     $('fileInput').value = '';
 };
 
@@ -696,22 +771,44 @@ function handleFileSelect(e) {
   selectedFile = file;
   $('uploadArea').classList.add('hidden');
   $('previewContainer').classList.remove('hidden');
+  $('scanActions').classList.remove('hidden');
   $('scanResult').classList.add('hidden');
+  $('scanPlaceholder').classList.remove('hidden');
+  
   const reader = new FileReader();
   reader.onload = e => $('imagePreview').src = e.target.result;
   reader.readAsDataURL(file);
 }
+
+const loaderTexts = [
+    "Reading your photo...",
+    "Detecting the sign...",
+    "Reading visible text...",
+    "Preparing your result..."
+];
 
 async function handleScan() {
   if(!selectedFile) return;
   const btn = $('btnScan');
   btn.textContent = "Analyzing..."; btn.disabled = true;
   
+  // Show animated loader
+  const loader = $('scanLoader');
+  const loaderText = $('loaderText');
+  loader.classList.remove('hidden');
+  loader.classList.add('flex');
+  
+  let textIndex = 0;
+  loaderText.textContent = loaderTexts[0];
+  const interval = setInterval(() => {
+      textIndex = (textIndex + 1) % loaderTexts.length;
+      loaderText.textContent = loaderTexts[textIndex];
+  }, 800);
+  
   const formData = new FormData();
   formData.append("file", selectedFile);
   
   try {
-    // FIX: ADDED AUTHORIZATION HEADER
     const res = await fetch("/api/analyze", { 
         method: "POST", 
         body: formData,
@@ -728,7 +825,12 @@ async function handleScan() {
     
     const data = await res.json();
     
-    // FIX: LOOK FOR 'detections' instead of 'predictions'
+    // Stop loader
+    clearInterval(interval);
+    loader.classList.add('hidden');
+    loader.classList.remove('flex');
+    $('scanPlaceholder').classList.add('hidden');
+    
     if(res.ok && data.detections && data.detections.length > 0) {
       const best = data.detections[0];
       $('resClass').textContent = best.class_name;
@@ -741,6 +843,9 @@ async function handleScan() {
       $('scanResult').classList.remove('hidden');
     }
   } catch(e) { 
+      clearInterval(interval);
+      loader.classList.add('hidden');
+      loader.classList.remove('flex');
       alert("Network error during scan."); 
   }
   btn.textContent = "Scan Image"; btn.disabled = false;
@@ -748,28 +853,46 @@ async function handleScan() {
 
 // History
 function saveHistory(result, imgUrl) {
-  let hist = JSON.parse(localStorage.getItem("scan_history") || "[]");
+  let hist = [];
+  try {
+      hist = JSON.parse(localStorage.getItem("scan_history") || "[]");
+  } catch(e) {
+      hist = [];
+  }
   hist.unshift({ date: new Date().toLocaleString(), result, imgUrl });
   if(hist.length > 10) hist.pop();
   localStorage.setItem("scan_history", JSON.stringify(hist));
 }
 
 function loadHistory() {
-  const hist = JSON.parse(localStorage.getItem("scan_history") || "[]");
+  let hist = [];
+  try {
+      hist = JSON.parse(localStorage.getItem("scan_history") || "[]");
+  } catch(e) {
+      hist = [];
+  }
   const list = $('historyList');
-  if(hist.length === 0) {
+  if(!hist || hist.length === 0) {
     list.innerHTML = '<p class="text-muted text-center py-8">No recent scans found.</p>';
     return;
   }
-  list.innerHTML = hist.map(h => `
-    <div class="glass-card flex gap-4 p-4 items-center mb-4 border border-white/5 bg-white/5">
-      <img src="${h.imgUrl}" class="w-20 h-20 object-cover rounded-md border border-white/10">
-      <div>
-        <h4 class="text-primary font-medium text-xl">${h.result.class_name}</h4>
-        <p class="text-muted text-sm mt-1">${(h.result.confidence * 100).toFixed(1)}% confidence • ${h.date}</p>
-      </div>
-    </div>
-  `).join('');
+  
+  let html = '';
+  hist.forEach(h => {
+      if (!h || !h.result) return;
+      const conf = h.result.confidence ? (h.result.confidence * 100).toFixed(1) : '0.0';
+      const name = h.result.class_name || 'Unknown';
+      html += `
+        <div class="glass-card flex gap-4 p-4 items-center mb-4 border border-white/5 bg-white/5">
+          <img src="${h.imgUrl}" class="w-20 h-20 object-cover rounded-md border border-white/10">
+          <div>
+            <h4 class="text-primary font-medium text-xl">${name}</h4>
+            <p class="text-muted text-sm mt-1">${conf}% confidence • ${h.date}</p>
+          </div>
+        </div>
+      `;
+  });
+  list.innerHTML = html || '<p class="text-muted text-center py-8">No valid scans found.</p>';
 }
 
 // Events Setup
@@ -784,7 +907,6 @@ function bindEvents() {
   drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
   drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('dragover'); handleFileSelect(e); });
   
-  // Also make the whole upload area clickable
   $('uploadArea').addEventListener('click', () => $('fileInput').click());
   $('fileInput').addEventListener('change', handleFileSelect);
 }

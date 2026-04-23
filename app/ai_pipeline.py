@@ -173,18 +173,8 @@ class SignDetector:
     def _prepare_ocr_variants(self, region: np.ndarray) -> list[np.ndarray]:
         gray = cv2.cvtColor(region, cv2.COLOR_BGR2GRAY)
         gray = cv2.bilateralFilter(gray, 5, 75, 75)
-
         _, otsu = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-        adaptive = cv2.adaptiveThreshold(
-            gray,
-            255,
-            cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-            cv2.THRESH_BINARY,
-            31,
-            11,
-        )
-
-        return [gray, otsu, cv2.bitwise_not(otsu), adaptive]
+        return [otsu]
 
     def _extract_text_from_region(self, image: np.ndarray, bbox: list[float]) -> str:
         if not self.ocr_available or pytesseract is None:
@@ -210,7 +200,6 @@ class SignDetector:
             best_text = ""
             configs = [
                 "--psm 7 --oem 3 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-",
-                "--psm 8 --oem 3 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-",
             ]
 
             for prepared_region in self._prepare_ocr_variants(region):
@@ -319,6 +308,13 @@ class SignDetector:
         image = cv2.imread(str(image_path))
         if image is None:
             raise ValueError(f"Could not read image: {image_path}")
+
+        # Resize image for much faster inference
+        max_dim = 1280
+        height, width = image.shape[:2]
+        if max(height, width) > max_dim:
+            scale = max_dim / max(height, width)
+            image = cv2.resize(image, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
 
         conf = confidence_threshold if confidence_threshold is not None else CONFIDENCE_THRESHOLD
         prediction = self.model.predict(
