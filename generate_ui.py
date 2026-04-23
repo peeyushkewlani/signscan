@@ -27,9 +27,9 @@ HTML_CONTENT = r"""<!DOCTYPE html>
                 <a href="#" onclick="navigate('contact')" class="nav-link">Contact</a>
             </div>
             <div class="nav-actions">
-                <button id="navDashboardBtn" onclick="navigate('app')" class="btn-outline hidden"><span id="navUsernameDisplay">Dashboard</span></button>
+                <button id="navDashboardBtn" onclick="navigate('app')" class="btn-outline" style="display: none;"><span id="navUsernameDisplay">Dashboard</span></button>
                 <button id="navLoginBtn" onclick="navigate('auth')" class="btn-glow">Sign In</button>
-                <button id="navLogoutBtn" onclick="logout()" class="btn-outline hidden">Log Out</button>
+                <button id="navLogoutBtn" onclick="logout()" class="btn-outline" style="display: none;">Log Out</button>
             </div>
         </div>
     </nav>
@@ -45,14 +45,14 @@ HTML_CONTENT = r"""<!DOCTYPE html>
                     Interactive, lightweight, and blazing fast AI.
                 </p>
                 <div class="hero-buttons">
-                    <button id="heroActionBtn" onclick="navigate('auth')" class="btn-primary">Get Started</button>
+                    <button id="heroActionBtn" onclick="handleHeroAction()" class="btn-primary">Get Started</button>
                     <button onclick="navigate('about')" class="btn-outline">Learn More</button>
                 </div>
             </div>
         </div>
 
         <!-- ── ABOUT SCREEN ── -->
-        <div id="screen-about" class="screen hidden">
+        <div id="screen-about" class="screen" style="display: none;">
             <div class="page-container fade-up">
                 <h2 class="page-title">About SignScan</h2>
                 <div class="divider"></div>
@@ -68,7 +68,7 @@ HTML_CONTENT = r"""<!DOCTYPE html>
         </div>
 
         <!-- ── CAPABILITIES SCREEN ── -->
-        <div id="screen-capabilities" class="screen hidden">
+        <div id="screen-capabilities" class="screen" style="display: none;">
             <div class="page-container fade-up">
                 <h2 class="page-title">Capabilities</h2>
                 <div class="divider"></div>
@@ -94,7 +94,7 @@ HTML_CONTENT = r"""<!DOCTYPE html>
         </div>
 
         <!-- ── CONTACT SCREEN ── -->
-        <div id="screen-contact" class="screen hidden">
+        <div id="screen-contact" class="screen" style="display: none;">
             <div class="page-container fade-up">
                 <h2 class="page-title">Contact Us</h2>
                 <div class="divider"></div>
@@ -117,7 +117,7 @@ HTML_CONTENT = r"""<!DOCTYPE html>
         </div>
 
         <!-- ── AUTH SCREEN ── -->
-        <div id="screen-auth" class="screen hidden">
+        <div id="screen-auth" class="screen" style="display: none;">
             <div class="auth-container fade-up">
                 <!-- Login -->
                 <div id="formLogin" class="glass-card auth-card">
@@ -134,14 +134,14 @@ HTML_CONTENT = r"""<!DOCTYPE html>
                         <label>Password</label>
                         <input type="password" id="logPassword" class="input-glass" placeholder="Enter password">
                     </div>
-                    <div id="loginError" class="alert-error hidden"></div>
-                    <div id="loginSuccess" class="alert-success hidden"></div>
+                    <div id="loginError" class="alert-error" style="display: none;"></div>
+                    <div id="loginSuccess" class="alert-success" style="display: none;"></div>
                     <button id="btnLoginAction" class="btn-primary w-full mt-2">Log In</button>
                     <p class="mt-4 text-center text-sm text-muted">Don't have an account? <a href="#" onclick="toggleAuth()" class="highlight">Sign up</a></p>
                 </div>
 
                 <!-- Register -->
-                <div id="formRegister" class="glass-card auth-card hidden">
+                <div id="formRegister" class="glass-card auth-card" style="display: none;">
                     <h2 class="card-title text-2xl font-medium mb-2">Create Account</h2>
                     <p class="text-muted mb-6">Join SignScan today</p>
                     
@@ -154,7 +154,7 @@ HTML_CONTENT = r"""<!DOCTYPE html>
                         <input type="password" id="regPassword" class="input-glass" placeholder="Min 8 chars, number & special">
                         <p class="text-xs text-muted mt-1">8+ characters · at least one number · special char</p>
                     </div>
-                    <div id="registerError" class="alert-error hidden"></div>
+                    <div id="registerError" class="alert-error" style="display: none;"></div>
                     <button id="btnRegisterAction" class="btn-primary w-full mt-2">Create Account</button>
                     <p class="mt-4 text-center text-sm text-muted">Already have an account? <a href="#" onclick="toggleAuth()" class="highlight">Log in</a></p>
                 </div>
@@ -162,22 +162,22 @@ HTML_CONTENT = r"""<!DOCTYPE html>
         </div>
 
         <!-- ── APP/DASHBOARD SCREEN ── -->
-        <div id="screen-app" class="screen hidden">
+        <div id="screen-app" class="screen" style="display: none;">
             <div class="dashboard-layout fade-up">
                 
-                <!-- Profile Header replaces the old sidebar -->
+                <!-- Profile Header -->
                 <div class="glass-card mb-6 profile-header flex flex-wrap justify-between items-center gap-4">
                     <div>
                         <h2 class="text-3xl font-medium tracking-tight">Hi, <span id="profUsernameHeading" class="highlight">User</span></h2>
                         <p class="text-muted mt-1">Account: <span class="capitalize text-white" id="profTypeHeader"></span> &nbsp;•&nbsp; Joined: <span class="text-white" id="profJoinedHeader"></span></p>
                     </div>
                     <div id="changePasswordSectionBtn">
-                        <button onclick="$('changePasswordModal').classList.toggle('hidden')" class="btn-outline text-sm">Change Password</button>
+                        <button onclick="$('changePasswordModal').style.display = $('changePasswordModal').style.display === 'none' ? 'block' : 'none';" class="btn-outline text-sm">Change Password</button>
                     </div>
                 </div>
 
                 <!-- Password Change Dropdown -->
-                <div id="changePasswordModal" class="glass-card mb-6 hidden border border-primary/30">
+                <div id="changePasswordModal" class="glass-card mb-6 border border-primary/30" style="display: none;">
                     <h3 class="text-lg font-medium mb-4">Update Password</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="form-group mb-0">
@@ -187,8 +187,8 @@ HTML_CONTENT = r"""<!DOCTYPE html>
                             <input type="password" id="cpNew" class="input-glass" placeholder="New Password">
                         </div>
                     </div>
-                    <div id="cpError" class="alert-error hidden mt-4"></div>
-                    <div id="cpSuccess" class="alert-success hidden mt-4"></div>
+                    <div id="cpError" class="alert-error mt-4" style="display: none;"></div>
+                    <div id="cpSuccess" class="alert-success mt-4" style="display: none;"></div>
                     <button id="btnChangePassword" class="btn-primary mt-4">Save Password</button>
                 </div>
 
@@ -200,7 +200,7 @@ HTML_CONTENT = r"""<!DOCTYPE html>
                 
                 <div class="dashboard-content">
                     <!-- Scan Tab -->
-                    <div id="tab-scan" class="app-tab active">
+                    <div id="tab-scan" class="app-tab" style="display: block;">
                         <div class="glass-card">
                             <h2 class="text-2xl font-medium mb-4">Analyze Traffic Sign</h2>
                             
@@ -209,19 +209,19 @@ HTML_CONTENT = r"""<!DOCTYPE html>
                                 <div class="upload-panel flex flex-col justify-center">
                                     <div class="upload-area" id="uploadArea">
                                         <p class="text-muted">Drag & drop image here or <span class="highlight cursor-pointer" id="btnBrowse">browse</span></p>
-                                        <input type="file" id="fileInput" class="hidden" accept="image/*">
+                                        <input type="file" id="fileInput" style="display: none;" accept="image/*">
                                     </div>
-                                    <div id="previewContainer" class="hidden text-center relative overflow-hidden rounded-xl">
+                                    <div id="previewContainer" style="display: none;" class="text-center relative overflow-hidden rounded-xl">
                                         <img id="imagePreview" class="w-full h-64 object-cover rounded-xl border border-white/10" src="" alt="Preview">
                                         
                                         <!-- Animated Loader Overlay -->
-                                        <div id="scanLoader" class="absolute inset-0 bg-black/80 backdrop-blur-sm hidden flex-col items-center justify-center rounded-xl z-10 transition-opacity">
+                                        <div id="scanLoader" class="absolute inset-0 bg-black/80 backdrop-blur-sm flex-col items-center justify-center rounded-xl z-10 transition-opacity" style="display: none;">
                                             <div class="loader-spinner"></div>
                                             <p id="loaderText" class="mt-4 text-primary font-medium tracking-wide">Scanning your sign...</p>
                                         </div>
                                     </div>
                                     
-                                    <div id="scanActions" class="hidden mt-4 flex gap-4">
+                                    <div id="scanActions" style="display: none;" class="mt-4 flex gap-4">
                                         <button id="btnScan" class="btn-primary flex-1">Scan Image</button>
                                         <button onclick="resetScan()" class="btn-outline flex-1">Cancel</button>
                                     </div>
@@ -229,7 +229,7 @@ HTML_CONTENT = r"""<!DOCTYPE html>
                                 
                                 <!-- Right Panel: Results -->
                                 <div class="results-panel flex flex-col justify-center">
-                                    <div id="scanResult" class="hidden transition-all">
+                                    <div id="scanResult" style="display: none;" class="transition-all">
                                         <div class="glass-card bg-white/5 border-primary/30 text-center py-8">
                                             <p class="text-sm text-muted uppercase tracking-widest mb-2">Detection Result</p>
                                             <h3 class="text-3xl text-primary font-medium" id="resClass">Stop Sign</h3>
@@ -247,7 +247,7 @@ HTML_CONTENT = r"""<!DOCTYPE html>
                     </div>
 
                     <!-- History Tab -->
-                    <div id="tab-history" class="app-tab hidden">
+                    <div id="tab-history" class="app-tab" style="display: none;">
                         <div class="glass-card">
                             <h2 class="text-2xl font-medium mb-4">Recent Scans</h2>
                             <div id="historyList" class="space-y-4">
@@ -331,9 +331,6 @@ button { font-family: inherit; cursor: pointer; border: none; outline: none; }
 
 /* Layout */
 .content-wrapper { padding-top: 80px; min-height: 100vh; position: relative; z-index: 10; }
-.screen { display: none; }
-.screen.active { display: block; }
-.hidden { display: none !important; }
 .flex { display: flex; }
 .flex-col { flex-direction: column; }
 .flex-wrap { flex-wrap: wrap; }
@@ -417,8 +414,6 @@ button { font-family: inherit; cursor: pointer; border: none; outline: none; }
 .tab-btn { background: var(--glass-bg); color: var(--text-muted); border: 1px solid var(--glass-border); border-radius: 12px; font-weight: 500; transition: all 0.2s; }
 .tab-btn:hover { background: rgba(255,255,255,0.05); color: white; }
 .tab-btn.active { background: var(--primary-dim); color: var(--primary); border-color: rgba(0, 255, 255, 0.3); }
-.app-tab { display: none; }
-.app-tab.active { display: block; }
 .upload-area { border: 2px dashed var(--glass-border); border-radius: 16px; padding: 48px 24px; text-align: center; transition: border-color 0.2s; cursor: pointer; }
 .upload-area:hover, .upload-area.dragover { border-color: var(--primary); background: rgba(0,255,255,0.02); }
 
@@ -592,13 +587,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   bindEvents();
 });
 
-// Navigation
+// Auth Routing Logic
+window.handleHeroAction = () => {
+    if (localStorage.getItem("auth_token")) {
+        navigate('app');
+    } else {
+        navigate('auth');
+    }
+};
+
 window.navigate = (screenId) => {
+  // If navigating to home and logged in, redirect to dashboard silently or just let them see home but ensure button works.
+  // We will let them see home, handleHeroAction will do the right thing.
   $$('.screen').forEach(s => {
     if(s.id === `screen-${screenId}`) {
-      s.classList.remove('hidden'); s.classList.add('active');
+      s.style.display = 'block';
+      setTimeout(() => s.classList.add('active'), 10);
     } else {
-      s.classList.remove('active'); s.classList.add('hidden');
+      s.classList.remove('active');
+      s.style.display = 'none';
     }
   });
   $$('.nav-link').forEach(l => l.classList.remove('active'));
@@ -609,17 +616,20 @@ window.navigate = (screenId) => {
 };
 
 window.switchAppTab = (tabId) => {
-  $$('.app-tab').forEach(t => t.classList.add('hidden'));
-  $(`tab-${tabId}`).classList.remove('hidden');
+  $$('.app-tab').forEach(t => t.style.display = 'none');
+  $(`tab-${tabId}`).style.display = 'block';
   $$('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelector(`button[onclick="switchAppTab('${tabId}')"]`).classList.add('active');
   if(tabId === 'history') loadHistory();
 };
 
 window.toggleAuth = () => {
-  $('formLogin').classList.toggle('hidden');
-  $('formRegister').classList.toggle('hidden');
-  $('loginError').classList.add('hidden'); $('registerError').classList.add('hidden');
+  const login = $('formLogin');
+  const reg = $('formRegister');
+  login.style.display = login.style.display === 'none' ? 'block' : 'none';
+  reg.style.display = reg.style.display === 'none' ? 'block' : 'none';
+  $('loginError').style.display = 'none'; 
+  $('registerError').style.display = 'none';
 };
 
 // Auth
@@ -628,26 +638,24 @@ function checkToken() {
   const u = localStorage.getItem("username");
   if(t && u) {
     currentUser = u;
-    $('navLoginBtn').classList.add('hidden');
-    $('navLogoutBtn').classList.remove('hidden');
-    $('navDashboardBtn').classList.remove('hidden');
+    $('navLoginBtn').style.display = 'none';
+    $('navLogoutBtn').style.display = 'block';
+    $('navDashboardBtn').style.display = 'block';
     $('navUsernameDisplay').textContent = u;
     
-    // Auth Flow: update hero button to go to dashboard
+    // Auth Flow: update hero button text
     if ($('heroActionBtn')) {
         $('heroActionBtn').textContent = 'Go to Dashboard';
-        $('heroActionBtn').onclick = () => navigate('app');
     }
   } else {
     currentUser = null;
-    $('navLoginBtn').classList.remove('hidden');
-    $('navLogoutBtn').classList.add('hidden');
-    $('navDashboardBtn').classList.add('hidden');
+    $('navLoginBtn').style.display = 'block';
+    $('navLogoutBtn').style.display = 'none';
+    $('navDashboardBtn').style.display = 'none';
     $('navUsernameDisplay').textContent = 'Dashboard';
     
     if ($('heroActionBtn')) {
         $('heroActionBtn').textContent = 'Get Started';
-        $('heroActionBtn').onclick = () => navigate('auth');
     }
   }
 }
@@ -664,8 +672,8 @@ window.logout = () => {
 async function handleLogin() {
   const u = $('logUsername').value.trim(), p = $('logPassword').value;
   const btn = $('btnLoginAction'), err = $('loginError');
-  err.classList.add('hidden');
-  if(!u || !p) { err.textContent = "Please fill all fields."; err.classList.remove('hidden'); return; }
+  err.style.display = 'none';
+  if(!u || !p) { err.textContent = "Please fill all fields."; err.style.display = 'block'; return; }
   
   btn.textContent = "Loading..."; btn.disabled = true;
   try {
@@ -681,17 +689,17 @@ async function handleLogin() {
       localStorage.setItem("join_date", data.join_date);
       checkToken(); navigate('app');
     } else {
-      err.textContent = data.error || "Login failed"; err.classList.remove('hidden');
+      err.textContent = data.error || "Login failed"; err.style.display = 'block';
     }
-  } catch(e) { err.textContent = "Network error"; err.classList.remove('hidden'); }
+  } catch(e) { err.textContent = "Network error"; err.style.display = 'block'; }
   btn.textContent = "Log In"; btn.disabled = false;
 }
 
 async function handleRegister() {
   const u = $('regUsername').value.trim(), p = $('regPassword').value;
   const btn = $('btnRegisterAction'), err = $('registerError');
-  err.classList.add('hidden');
-  if(!u || !p) { err.textContent = "Please fill all fields."; err.classList.remove('hidden'); return; }
+  err.style.display = 'none';
+  if(!u || !p) { err.textContent = "Please fill all fields."; err.style.display = 'block'; return; }
   
   btn.textContent = "Loading..."; btn.disabled = true;
   try {
@@ -705,9 +713,9 @@ async function handleRegister() {
       toggleAuth();
       $('logUsername').value = u;
     } else {
-      err.textContent = data.error || "Registration failed"; err.classList.remove('hidden');
+      err.textContent = data.error || "Registration failed"; err.style.display = 'block';
     }
-  } catch(e) { err.textContent = "Network error"; err.classList.remove('hidden'); }
+  } catch(e) { err.textContent = "Network error"; err.style.display = 'block'; }
   btn.textContent = "Create Account"; btn.disabled = false;
 }
 
@@ -718,18 +726,18 @@ function loadProfile() {
   $('profJoinedHeader').textContent = localStorage.getItem("join_date") || "Unknown";
   
   if(localStorage.getItem("account_type") === "google") {
-    $('changePasswordSectionBtn').classList.add('hidden');
-    $('changePasswordModal').classList.add('hidden');
+    $('changePasswordSectionBtn').style.display = 'none';
+    $('changePasswordModal').style.display = 'none';
   } else {
-    $('changePasswordSectionBtn').classList.remove('hidden');
+    $('changePasswordSectionBtn').style.display = 'block';
   }
 }
 
 async function handleChangePassword() {
   const o = $('cpOld').value, n = $('cpNew').value;
   const err = $('cpError'), suc = $('cpSuccess'), btn = $('btnChangePassword');
-  err.classList.add('hidden'); suc.classList.add('hidden');
-  if(!o || !n) { err.textContent = "Fill all fields."; err.classList.remove('hidden'); return; }
+  err.style.display = 'none'; suc.style.display = 'none';
+  if(!o || !n) { err.textContent = "Fill all fields."; err.style.display = 'block'; return; }
   
   btn.textContent = "Updating..."; btn.disabled = true;
   try {
@@ -742,13 +750,13 @@ async function handleChangePassword() {
     });
     const data = await res.json();
     if(res.ok) {
-      suc.textContent = "Password updated successfully."; suc.classList.remove('hidden');
+      suc.textContent = "Password updated successfully."; suc.style.display = 'block';
       $('cpOld').value = ''; $('cpNew').value = '';
-      setTimeout(() => $('changePasswordModal').classList.add('hidden'), 2000);
+      setTimeout(() => $('changePasswordModal').style.display = 'none', 2000);
     } else {
-      err.textContent = data.error || "Failed"; err.classList.remove('hidden');
+      err.textContent = data.error || "Failed"; err.style.display = 'block';
     }
-  } catch(e) { err.textContent = "Network error"; err.classList.remove('hidden'); }
+  } catch(e) { err.textContent = "Network error"; err.style.display = 'block'; }
   btn.textContent = "Save Password"; btn.disabled = false;
 }
 
@@ -757,11 +765,15 @@ let selectedFile = null;
 
 window.resetScan = () => {
     selectedFile = null;
-    $('uploadArea').classList.remove('hidden');
-    $('previewContainer').classList.add('hidden');
-    $('scanActions').classList.add('hidden');
-    $('scanResult').classList.add('hidden');
-    $('scanPlaceholder').classList.remove('hidden');
+    $('uploadArea').style.display = 'block';
+    $('previewContainer').style.display = 'none';
+    $('scanActions').style.display = 'none';
+    $('scanResult').style.display = 'none';
+    
+    // reset placeholder
+    $('scanPlaceholder').style.display = 'block';
+    $('scanPlaceholder').innerHTML = '<svg class="w-16 h-16 mx-auto mb-4 opacity-20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg><p>Upload an image to see results here</p>';
+    
     $('fileInput').value = '';
 };
 
@@ -769,11 +781,15 @@ function handleFileSelect(e) {
   const file = e.target.files ? e.target.files[0] : e.dataTransfer?.files[0];
   if(!file) return;
   selectedFile = file;
-  $('uploadArea').classList.add('hidden');
-  $('previewContainer').classList.remove('hidden');
-  $('scanActions').classList.remove('hidden');
-  $('scanResult').classList.add('hidden');
-  $('scanPlaceholder').classList.remove('hidden');
+  
+  $('uploadArea').style.display = 'none';
+  $('previewContainer').style.display = 'block';
+  $('scanActions').style.display = 'flex';
+  $('scanResult').style.display = 'none';
+  
+  // UX: Show ready text in placeholder instead of "Upload an image"
+  $('scanPlaceholder').style.display = 'block';
+  $('scanPlaceholder').innerHTML = '<svg class="w-16 h-16 mx-auto mb-4 opacity-50 text-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9v-2h2v2zm0-4H9V7h2v5z"/></svg><p class="text-primary font-medium text-lg">Ready to scan!</p><p class="text-sm mt-2">Click the <b>Scan Image</b> button to analyze.</p>';
   
   const reader = new FileReader();
   reader.onload = e => $('imagePreview').src = e.target.result;
@@ -795,8 +811,7 @@ async function handleScan() {
   // Show animated loader
   const loader = $('scanLoader');
   const loaderText = $('loaderText');
-  loader.classList.remove('hidden');
-  loader.classList.add('flex');
+  loader.style.display = 'flex';
   
   let textIndex = 0;
   loaderText.textContent = loaderTexts[0];
@@ -827,25 +842,23 @@ async function handleScan() {
     
     // Stop loader
     clearInterval(interval);
-    loader.classList.add('hidden');
-    loader.classList.remove('flex');
-    $('scanPlaceholder').classList.add('hidden');
+    loader.style.display = 'none';
+    $('scanPlaceholder').style.display = 'none';
     
     if(res.ok && data.detections && data.detections.length > 0) {
       const best = data.detections[0];
       $('resClass').textContent = best.class_name;
       $('resConf').textContent = `Confidence: ${(best.confidence * 100).toFixed(1)}%`;
-      $('scanResult').classList.remove('hidden');
+      $('scanResult').style.display = 'block';
       saveHistory(best, $('imagePreview').src);
     } else {
       $('resClass').textContent = "No Sign Detected";
       $('resConf').textContent = "Please try another image.";
-      $('scanResult').classList.remove('hidden');
+      $('scanResult').style.display = 'block';
     }
   } catch(e) { 
       clearInterval(interval);
-      loader.classList.add('hidden');
-      loader.classList.remove('flex');
+      loader.style.display = 'none';
       alert("Network error during scan."); 
   }
   btn.textContent = "Scan Image"; btn.disabled = false;
@@ -859,8 +872,17 @@ function saveHistory(result, imgUrl) {
   } catch(e) {
       hist = [];
   }
-  hist.unshift({ date: new Date().toLocaleString(), result, imgUrl });
-  if(hist.length > 10) hist.pop();
+  
+  // Create a clean object to save
+  const newScan = {
+      date: new Date().toLocaleString(),
+      className: result.class_name || "Unknown",
+      confidence: result.confidence || 0,
+      imgUrl: imgUrl
+  };
+  
+  hist.unshift(newScan);
+  if(hist.length > 20) hist.pop();
   localStorage.setItem("scan_history", JSON.stringify(hist));
 }
 
@@ -879,15 +901,18 @@ function loadHistory() {
   
   let html = '';
   hist.forEach(h => {
-      if (!h || !h.result) return;
-      const conf = h.result.confidence ? (h.result.confidence * 100).toFixed(1) : '0.0';
-      const name = h.result.class_name || 'Unknown';
+      // Handle both old and new data structures gracefully
+      if (!h) return;
+      const conf = h.confidence !== undefined ? h.confidence : (h.result && h.result.confidence ? h.result.confidence : 0);
+      const name = h.className || (h.result && h.result.class_name) || 'Unknown';
+      const confPercent = (conf * 100).toFixed(1);
+      
       html += `
         <div class="glass-card flex gap-4 p-4 items-center mb-4 border border-white/5 bg-white/5">
           <img src="${h.imgUrl}" class="w-20 h-20 object-cover rounded-md border border-white/10">
           <div>
             <h4 class="text-primary font-medium text-xl">${name}</h4>
-            <p class="text-muted text-sm mt-1">${conf}% confidence • ${h.date}</p>
+            <p class="text-muted text-sm mt-1">${confPercent}% confidence • ${h.date}</p>
           </div>
         </div>
       `;
@@ -921,7 +946,7 @@ def generate():
         f.write(CSS_CONTENT)
     with open('app/static/js/app.js', 'w', encoding='utf-8') as f:
         f.write(JS_CONTENT)
-    print("UI generation complete! Models and profile layout fixed.")
+    print("UI generation complete! Final bug fixes applied.")
 
 if __name__ == "__main__":
     generate()

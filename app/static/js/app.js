@@ -133,13 +133,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   bindEvents();
 });
 
-// Navigation
+// Auth Routing Logic
+window.handleHeroAction = () => {
+    if (localStorage.getItem("auth_token")) {
+        navigate('app');
+    } else {
+        navigate('auth');
+    }
+};
+
 window.navigate = (screenId) => {
+  // If navigating to home and logged in, redirect to dashboard silently or just let them see home but ensure button works.
+  // We will let them see home, handleHeroAction will do the right thing.
   $$('.screen').forEach(s => {
     if(s.id === `screen-${screenId}`) {
-      s.classList.remove('hidden'); s.classList.add('active');
+      s.style.display = 'block';
+      setTimeout(() => s.classList.add('active'), 10);
     } else {
-      s.classList.remove('active'); s.classList.add('hidden');
+      s.classList.remove('active');
+      s.style.display = 'none';
     }
   });
   $$('.nav-link').forEach(l => l.classList.remove('active'));
@@ -150,17 +162,20 @@ window.navigate = (screenId) => {
 };
 
 window.switchAppTab = (tabId) => {
-  $$('.app-tab').forEach(t => t.classList.add('hidden'));
-  $(`tab-${tabId}`).classList.remove('hidden');
+  $$('.app-tab').forEach(t => t.style.display = 'none');
+  $(`tab-${tabId}`).style.display = 'block';
   $$('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelector(`button[onclick="switchAppTab('${tabId}')"]`).classList.add('active');
   if(tabId === 'history') loadHistory();
 };
 
 window.toggleAuth = () => {
-  $('formLogin').classList.toggle('hidden');
-  $('formRegister').classList.toggle('hidden');
-  $('loginError').classList.add('hidden'); $('registerError').classList.add('hidden');
+  const login = $('formLogin');
+  const reg = $('formRegister');
+  login.style.display = login.style.display === 'none' ? 'block' : 'none';
+  reg.style.display = reg.style.display === 'none' ? 'block' : 'none';
+  $('loginError').style.display = 'none'; 
+  $('registerError').style.display = 'none';
 };
 
 // Auth
@@ -169,26 +184,24 @@ function checkToken() {
   const u = localStorage.getItem("username");
   if(t && u) {
     currentUser = u;
-    $('navLoginBtn').classList.add('hidden');
-    $('navLogoutBtn').classList.remove('hidden');
-    $('navDashboardBtn').classList.remove('hidden');
+    $('navLoginBtn').style.display = 'none';
+    $('navLogoutBtn').style.display = 'block';
+    $('navDashboardBtn').style.display = 'block';
     $('navUsernameDisplay').textContent = u;
     
-    // Auth Flow: update hero button to go to dashboard
+    // Auth Flow: update hero button text
     if ($('heroActionBtn')) {
         $('heroActionBtn').textContent = 'Go to Dashboard';
-        $('heroActionBtn').onclick = () => navigate('app');
     }
   } else {
     currentUser = null;
-    $('navLoginBtn').classList.remove('hidden');
-    $('navLogoutBtn').classList.add('hidden');
-    $('navDashboardBtn').classList.add('hidden');
+    $('navLoginBtn').style.display = 'block';
+    $('navLogoutBtn').style.display = 'none';
+    $('navDashboardBtn').style.display = 'none';
     $('navUsernameDisplay').textContent = 'Dashboard';
     
     if ($('heroActionBtn')) {
         $('heroActionBtn').textContent = 'Get Started';
-        $('heroActionBtn').onclick = () => navigate('auth');
     }
   }
 }
@@ -205,8 +218,8 @@ window.logout = () => {
 async function handleLogin() {
   const u = $('logUsername').value.trim(), p = $('logPassword').value;
   const btn = $('btnLoginAction'), err = $('loginError');
-  err.classList.add('hidden');
-  if(!u || !p) { err.textContent = "Please fill all fields."; err.classList.remove('hidden'); return; }
+  err.style.display = 'none';
+  if(!u || !p) { err.textContent = "Please fill all fields."; err.style.display = 'block'; return; }
   
   btn.textContent = "Loading..."; btn.disabled = true;
   try {
@@ -222,17 +235,17 @@ async function handleLogin() {
       localStorage.setItem("join_date", data.join_date);
       checkToken(); navigate('app');
     } else {
-      err.textContent = data.error || "Login failed"; err.classList.remove('hidden');
+      err.textContent = data.error || "Login failed"; err.style.display = 'block';
     }
-  } catch(e) { err.textContent = "Network error"; err.classList.remove('hidden'); }
+  } catch(e) { err.textContent = "Network error"; err.style.display = 'block'; }
   btn.textContent = "Log In"; btn.disabled = false;
 }
 
 async function handleRegister() {
   const u = $('regUsername').value.trim(), p = $('regPassword').value;
   const btn = $('btnRegisterAction'), err = $('registerError');
-  err.classList.add('hidden');
-  if(!u || !p) { err.textContent = "Please fill all fields."; err.classList.remove('hidden'); return; }
+  err.style.display = 'none';
+  if(!u || !p) { err.textContent = "Please fill all fields."; err.style.display = 'block'; return; }
   
   btn.textContent = "Loading..."; btn.disabled = true;
   try {
@@ -246,9 +259,9 @@ async function handleRegister() {
       toggleAuth();
       $('logUsername').value = u;
     } else {
-      err.textContent = data.error || "Registration failed"; err.classList.remove('hidden');
+      err.textContent = data.error || "Registration failed"; err.style.display = 'block';
     }
-  } catch(e) { err.textContent = "Network error"; err.classList.remove('hidden'); }
+  } catch(e) { err.textContent = "Network error"; err.style.display = 'block'; }
   btn.textContent = "Create Account"; btn.disabled = false;
 }
 
@@ -259,18 +272,18 @@ function loadProfile() {
   $('profJoinedHeader').textContent = localStorage.getItem("join_date") || "Unknown";
   
   if(localStorage.getItem("account_type") === "google") {
-    $('changePasswordSectionBtn').classList.add('hidden');
-    $('changePasswordModal').classList.add('hidden');
+    $('changePasswordSectionBtn').style.display = 'none';
+    $('changePasswordModal').style.display = 'none';
   } else {
-    $('changePasswordSectionBtn').classList.remove('hidden');
+    $('changePasswordSectionBtn').style.display = 'block';
   }
 }
 
 async function handleChangePassword() {
   const o = $('cpOld').value, n = $('cpNew').value;
   const err = $('cpError'), suc = $('cpSuccess'), btn = $('btnChangePassword');
-  err.classList.add('hidden'); suc.classList.add('hidden');
-  if(!o || !n) { err.textContent = "Fill all fields."; err.classList.remove('hidden'); return; }
+  err.style.display = 'none'; suc.style.display = 'none';
+  if(!o || !n) { err.textContent = "Fill all fields."; err.style.display = 'block'; return; }
   
   btn.textContent = "Updating..."; btn.disabled = true;
   try {
@@ -283,13 +296,13 @@ async function handleChangePassword() {
     });
     const data = await res.json();
     if(res.ok) {
-      suc.textContent = "Password updated successfully."; suc.classList.remove('hidden');
+      suc.textContent = "Password updated successfully."; suc.style.display = 'block';
       $('cpOld').value = ''; $('cpNew').value = '';
-      setTimeout(() => $('changePasswordModal').classList.add('hidden'), 2000);
+      setTimeout(() => $('changePasswordModal').style.display = 'none', 2000);
     } else {
-      err.textContent = data.error || "Failed"; err.classList.remove('hidden');
+      err.textContent = data.error || "Failed"; err.style.display = 'block';
     }
-  } catch(e) { err.textContent = "Network error"; err.classList.remove('hidden'); }
+  } catch(e) { err.textContent = "Network error"; err.style.display = 'block'; }
   btn.textContent = "Save Password"; btn.disabled = false;
 }
 
@@ -298,11 +311,15 @@ let selectedFile = null;
 
 window.resetScan = () => {
     selectedFile = null;
-    $('uploadArea').classList.remove('hidden');
-    $('previewContainer').classList.add('hidden');
-    $('scanActions').classList.add('hidden');
-    $('scanResult').classList.add('hidden');
-    $('scanPlaceholder').classList.remove('hidden');
+    $('uploadArea').style.display = 'block';
+    $('previewContainer').style.display = 'none';
+    $('scanActions').style.display = 'none';
+    $('scanResult').style.display = 'none';
+    
+    // reset placeholder
+    $('scanPlaceholder').style.display = 'block';
+    $('scanPlaceholder').innerHTML = '<svg class="w-16 h-16 mx-auto mb-4 opacity-20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg><p>Upload an image to see results here</p>';
+    
     $('fileInput').value = '';
 };
 
@@ -310,11 +327,15 @@ function handleFileSelect(e) {
   const file = e.target.files ? e.target.files[0] : e.dataTransfer?.files[0];
   if(!file) return;
   selectedFile = file;
-  $('uploadArea').classList.add('hidden');
-  $('previewContainer').classList.remove('hidden');
-  $('scanActions').classList.remove('hidden');
-  $('scanResult').classList.add('hidden');
-  $('scanPlaceholder').classList.remove('hidden');
+  
+  $('uploadArea').style.display = 'none';
+  $('previewContainer').style.display = 'block';
+  $('scanActions').style.display = 'flex';
+  $('scanResult').style.display = 'none';
+  
+  // UX: Show ready text in placeholder instead of "Upload an image"
+  $('scanPlaceholder').style.display = 'block';
+  $('scanPlaceholder').innerHTML = '<svg class="w-16 h-16 mx-auto mb-4 opacity-50 text-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9v-2h2v2zm0-4H9V7h2v5z"/></svg><p class="text-primary font-medium text-lg">Ready to scan!</p><p class="text-sm mt-2">Click the <b>Scan Image</b> button to analyze.</p>';
   
   const reader = new FileReader();
   reader.onload = e => $('imagePreview').src = e.target.result;
@@ -336,8 +357,7 @@ async function handleScan() {
   // Show animated loader
   const loader = $('scanLoader');
   const loaderText = $('loaderText');
-  loader.classList.remove('hidden');
-  loader.classList.add('flex');
+  loader.style.display = 'flex';
   
   let textIndex = 0;
   loaderText.textContent = loaderTexts[0];
@@ -368,25 +388,23 @@ async function handleScan() {
     
     // Stop loader
     clearInterval(interval);
-    loader.classList.add('hidden');
-    loader.classList.remove('flex');
-    $('scanPlaceholder').classList.add('hidden');
+    loader.style.display = 'none';
+    $('scanPlaceholder').style.display = 'none';
     
     if(res.ok && data.detections && data.detections.length > 0) {
       const best = data.detections[0];
       $('resClass').textContent = best.class_name;
       $('resConf').textContent = `Confidence: ${(best.confidence * 100).toFixed(1)}%`;
-      $('scanResult').classList.remove('hidden');
+      $('scanResult').style.display = 'block';
       saveHistory(best, $('imagePreview').src);
     } else {
       $('resClass').textContent = "No Sign Detected";
       $('resConf').textContent = "Please try another image.";
-      $('scanResult').classList.remove('hidden');
+      $('scanResult').style.display = 'block';
     }
   } catch(e) { 
       clearInterval(interval);
-      loader.classList.add('hidden');
-      loader.classList.remove('flex');
+      loader.style.display = 'none';
       alert("Network error during scan."); 
   }
   btn.textContent = "Scan Image"; btn.disabled = false;
@@ -400,8 +418,17 @@ function saveHistory(result, imgUrl) {
   } catch(e) {
       hist = [];
   }
-  hist.unshift({ date: new Date().toLocaleString(), result, imgUrl });
-  if(hist.length > 10) hist.pop();
+  
+  // Create a clean object to save
+  const newScan = {
+      date: new Date().toLocaleString(),
+      className: result.class_name || "Unknown",
+      confidence: result.confidence || 0,
+      imgUrl: imgUrl
+  };
+  
+  hist.unshift(newScan);
+  if(hist.length > 20) hist.pop();
   localStorage.setItem("scan_history", JSON.stringify(hist));
 }
 
@@ -420,15 +447,18 @@ function loadHistory() {
   
   let html = '';
   hist.forEach(h => {
-      if (!h || !h.result) return;
-      const conf = h.result.confidence ? (h.result.confidence * 100).toFixed(1) : '0.0';
-      const name = h.result.class_name || 'Unknown';
+      // Handle both old and new data structures gracefully
+      if (!h) return;
+      const conf = h.confidence !== undefined ? h.confidence : (h.result && h.result.confidence ? h.result.confidence : 0);
+      const name = h.className || (h.result && h.result.class_name) || 'Unknown';
+      const confPercent = (conf * 100).toFixed(1);
+      
       html += `
         <div class="glass-card flex gap-4 p-4 items-center mb-4 border border-white/5 bg-white/5">
           <img src="${h.imgUrl}" class="w-20 h-20 object-cover rounded-md border border-white/10">
           <div>
             <h4 class="text-primary font-medium text-xl">${name}</h4>
-            <p class="text-muted text-sm mt-1">${conf}% confidence • ${h.date}</p>
+            <p class="text-muted text-sm mt-1">${confPercent}% confidence • ${h.date}</p>
           </div>
         </div>
       `;

@@ -25,9 +25,9 @@
                 <a href="#" onclick="navigate('contact')" class="nav-link">Contact</a>
             </div>
             <div class="nav-actions">
-                <button id="navDashboardBtn" onclick="navigate('app')" class="btn-outline hidden"><span id="navUsernameDisplay">Dashboard</span></button>
+                <button id="navDashboardBtn" onclick="navigate('app')" class="btn-outline" style="display: none;"><span id="navUsernameDisplay">Dashboard</span></button>
                 <button id="navLoginBtn" onclick="navigate('auth')" class="btn-glow">Sign In</button>
-                <button id="navLogoutBtn" onclick="logout()" class="btn-outline hidden">Log Out</button>
+                <button id="navLogoutBtn" onclick="logout()" class="btn-outline" style="display: none;">Log Out</button>
             </div>
         </div>
     </nav>
@@ -43,14 +43,14 @@
                     Interactive, lightweight, and blazing fast AI.
                 </p>
                 <div class="hero-buttons">
-                    <button id="heroActionBtn" onclick="navigate('auth')" class="btn-primary">Get Started</button>
+                    <button id="heroActionBtn" onclick="handleHeroAction()" class="btn-primary">Get Started</button>
                     <button onclick="navigate('about')" class="btn-outline">Learn More</button>
                 </div>
             </div>
         </div>
 
         <!-- ── ABOUT SCREEN ── -->
-        <div id="screen-about" class="screen hidden">
+        <div id="screen-about" class="screen" style="display: none;">
             <div class="page-container fade-up">
                 <h2 class="page-title">About SignScan</h2>
                 <div class="divider"></div>
@@ -66,7 +66,7 @@
         </div>
 
         <!-- ── CAPABILITIES SCREEN ── -->
-        <div id="screen-capabilities" class="screen hidden">
+        <div id="screen-capabilities" class="screen" style="display: none;">
             <div class="page-container fade-up">
                 <h2 class="page-title">Capabilities</h2>
                 <div class="divider"></div>
@@ -92,7 +92,7 @@
         </div>
 
         <!-- ── CONTACT SCREEN ── -->
-        <div id="screen-contact" class="screen hidden">
+        <div id="screen-contact" class="screen" style="display: none;">
             <div class="page-container fade-up">
                 <h2 class="page-title">Contact Us</h2>
                 <div class="divider"></div>
@@ -115,7 +115,7 @@
         </div>
 
         <!-- ── AUTH SCREEN ── -->
-        <div id="screen-auth" class="screen hidden">
+        <div id="screen-auth" class="screen" style="display: none;">
             <div class="auth-container fade-up">
                 <!-- Login -->
                 <div id="formLogin" class="glass-card auth-card">
@@ -132,14 +132,14 @@
                         <label>Password</label>
                         <input type="password" id="logPassword" class="input-glass" placeholder="Enter password">
                     </div>
-                    <div id="loginError" class="alert-error hidden"></div>
-                    <div id="loginSuccess" class="alert-success hidden"></div>
+                    <div id="loginError" class="alert-error" style="display: none;"></div>
+                    <div id="loginSuccess" class="alert-success" style="display: none;"></div>
                     <button id="btnLoginAction" class="btn-primary w-full mt-2">Log In</button>
                     <p class="mt-4 text-center text-sm text-muted">Don't have an account? <a href="#" onclick="toggleAuth()" class="highlight">Sign up</a></p>
                 </div>
 
                 <!-- Register -->
-                <div id="formRegister" class="glass-card auth-card hidden">
+                <div id="formRegister" class="glass-card auth-card" style="display: none;">
                     <h2 class="card-title text-2xl font-medium mb-2">Create Account</h2>
                     <p class="text-muted mb-6">Join SignScan today</p>
                     
@@ -152,7 +152,7 @@
                         <input type="password" id="regPassword" class="input-glass" placeholder="Min 8 chars, number & special">
                         <p class="text-xs text-muted mt-1">8+ characters · at least one number · special char</p>
                     </div>
-                    <div id="registerError" class="alert-error hidden"></div>
+                    <div id="registerError" class="alert-error" style="display: none;"></div>
                     <button id="btnRegisterAction" class="btn-primary w-full mt-2">Create Account</button>
                     <p class="mt-4 text-center text-sm text-muted">Already have an account? <a href="#" onclick="toggleAuth()" class="highlight">Log in</a></p>
                 </div>
@@ -160,22 +160,22 @@
         </div>
 
         <!-- ── APP/DASHBOARD SCREEN ── -->
-        <div id="screen-app" class="screen hidden">
+        <div id="screen-app" class="screen" style="display: none;">
             <div class="dashboard-layout fade-up">
                 
-                <!-- Profile Header replaces the old sidebar -->
+                <!-- Profile Header -->
                 <div class="glass-card mb-6 profile-header flex flex-wrap justify-between items-center gap-4">
                     <div>
                         <h2 class="text-3xl font-medium tracking-tight">Hi, <span id="profUsernameHeading" class="highlight">User</span></h2>
                         <p class="text-muted mt-1">Account: <span class="capitalize text-white" id="profTypeHeader"></span> &nbsp;•&nbsp; Joined: <span class="text-white" id="profJoinedHeader"></span></p>
                     </div>
                     <div id="changePasswordSectionBtn">
-                        <button onclick="$('changePasswordModal').classList.toggle('hidden')" class="btn-outline text-sm">Change Password</button>
+                        <button onclick="$('changePasswordModal').style.display = $('changePasswordModal').style.display === 'none' ? 'block' : 'none';" class="btn-outline text-sm">Change Password</button>
                     </div>
                 </div>
 
                 <!-- Password Change Dropdown -->
-                <div id="changePasswordModal" class="glass-card mb-6 hidden border border-primary/30">
+                <div id="changePasswordModal" class="glass-card mb-6 border border-primary/30" style="display: none;">
                     <h3 class="text-lg font-medium mb-4">Update Password</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="form-group mb-0">
@@ -185,8 +185,8 @@
                             <input type="password" id="cpNew" class="input-glass" placeholder="New Password">
                         </div>
                     </div>
-                    <div id="cpError" class="alert-error hidden mt-4"></div>
-                    <div id="cpSuccess" class="alert-success hidden mt-4"></div>
+                    <div id="cpError" class="alert-error mt-4" style="display: none;"></div>
+                    <div id="cpSuccess" class="alert-success mt-4" style="display: none;"></div>
                     <button id="btnChangePassword" class="btn-primary mt-4">Save Password</button>
                 </div>
 
@@ -198,7 +198,7 @@
                 
                 <div class="dashboard-content">
                     <!-- Scan Tab -->
-                    <div id="tab-scan" class="app-tab active">
+                    <div id="tab-scan" class="app-tab" style="display: block;">
                         <div class="glass-card">
                             <h2 class="text-2xl font-medium mb-4">Analyze Traffic Sign</h2>
                             
@@ -207,19 +207,19 @@
                                 <div class="upload-panel flex flex-col justify-center">
                                     <div class="upload-area" id="uploadArea">
                                         <p class="text-muted">Drag & drop image here or <span class="highlight cursor-pointer" id="btnBrowse">browse</span></p>
-                                        <input type="file" id="fileInput" class="hidden" accept="image/*">
+                                        <input type="file" id="fileInput" style="display: none;" accept="image/*">
                                     </div>
-                                    <div id="previewContainer" class="hidden text-center relative overflow-hidden rounded-xl">
+                                    <div id="previewContainer" style="display: none;" class="text-center relative overflow-hidden rounded-xl">
                                         <img id="imagePreview" class="w-full h-64 object-cover rounded-xl border border-white/10" src="" alt="Preview">
                                         
                                         <!-- Animated Loader Overlay -->
-                                        <div id="scanLoader" class="absolute inset-0 bg-black/80 backdrop-blur-sm hidden flex-col items-center justify-center rounded-xl z-10 transition-opacity">
+                                        <div id="scanLoader" class="absolute inset-0 bg-black/80 backdrop-blur-sm flex-col items-center justify-center rounded-xl z-10 transition-opacity" style="display: none;">
                                             <div class="loader-spinner"></div>
                                             <p id="loaderText" class="mt-4 text-primary font-medium tracking-wide">Scanning your sign...</p>
                                         </div>
                                     </div>
                                     
-                                    <div id="scanActions" class="hidden mt-4 flex gap-4">
+                                    <div id="scanActions" style="display: none;" class="mt-4 flex gap-4">
                                         <button id="btnScan" class="btn-primary flex-1">Scan Image</button>
                                         <button onclick="resetScan()" class="btn-outline flex-1">Cancel</button>
                                     </div>
@@ -227,7 +227,7 @@
                                 
                                 <!-- Right Panel: Results -->
                                 <div class="results-panel flex flex-col justify-center">
-                                    <div id="scanResult" class="hidden transition-all">
+                                    <div id="scanResult" style="display: none;" class="transition-all">
                                         <div class="glass-card bg-white/5 border-primary/30 text-center py-8">
                                             <p class="text-sm text-muted uppercase tracking-widest mb-2">Detection Result</p>
                                             <h3 class="text-3xl text-primary font-medium" id="resClass">Stop Sign</h3>
@@ -245,7 +245,7 @@
                     </div>
 
                     <!-- History Tab -->
-                    <div id="tab-history" class="app-tab hidden">
+                    <div id="tab-history" class="app-tab" style="display: none;">
                         <div class="glass-card">
                             <h2 class="text-2xl font-medium mb-4">Recent Scans</h2>
                             <div id="historyList" class="space-y-4">

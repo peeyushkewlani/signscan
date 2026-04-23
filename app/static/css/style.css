@@ -64,9 +64,6 @@ button { font-family: inherit; cursor: pointer; border: none; outline: none; }
 
 /* Layout */
 .content-wrapper { padding-top: 80px; min-height: 100vh; position: relative; z-index: 10; }
-.screen { display: none; }
-.screen.active { display: block; }
-.hidden { display: none !important; }
 .flex { display: flex; }
 .flex-col { flex-direction: column; }
 .flex-wrap { flex-wrap: wrap; }
@@ -150,8 +147,6 @@ button { font-family: inherit; cursor: pointer; border: none; outline: none; }
 .tab-btn { background: var(--glass-bg); color: var(--text-muted); border: 1px solid var(--glass-border); border-radius: 12px; font-weight: 500; transition: all 0.2s; }
 .tab-btn:hover { background: rgba(255,255,255,0.05); color: white; }
 .tab-btn.active { background: var(--primary-dim); color: var(--primary); border-color: rgba(0, 255, 255, 0.3); }
-.app-tab { display: none; }
-.app-tab.active { display: block; }
 .upload-area { border: 2px dashed var(--glass-border); border-radius: 16px; padding: 48px 24px; text-align: center; transition: border-color 0.2s; cursor: pointer; }
 .upload-area:hover, .upload-area.dragover { border-color: var(--primary); background: rgba(0,255,255,0.02); }
 
