@@ -384,7 +384,7 @@ function bindEvents() {
   
   const drop = $('uploadArea');
   drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('dragover'); });
-  drop.addEventListener('dragleave', () => drop.classList.remove('dragover'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
   drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('dragover'); handleFileSelect(e); });
   
   // Also make the whole upload area clickable
