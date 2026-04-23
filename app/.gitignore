@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+uploads/*
+!uploads/.gitkeep
+.env
+*.egg-info/
+dist/
+build/
+.vscode/
+.idea/
+*.pt.bak
+runs/

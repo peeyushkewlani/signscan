@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: signscan
+    env: docker
+    plan: free
+    rootDir: ./app          # build context = app/ folder
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: GOOGLE_CLIENT_ID
+        value: ""           # fill in after deployment for Google login

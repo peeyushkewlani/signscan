@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SignScan instantly identifies any traffic sign — upload a photo and get the sign name, meaning, and confidence score in seconds.">
+  <title>SignScan — Identify Any Traffic Sign Instantly</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async></script>
+</head>
+<body>
+
+<!-- ════════════════════ LANDING PAGE ════════════════════ -->
+<div class="screen active" id="screenLanding">
+  <header class="land-nav">
+    <div class="land-logo">
+      <div class="logo-mark">S</div>
+      <span>SignScan</span>
+    </div>
+    <div class="land-nav-actions">
+      <button class="btn btn-ghost" id="btnGoLogin" type="button">Log in</button>
+      <button class="btn btn-primary" id="btnGoRegister" type="button">Get started free</button>
+    </div>
+  </header>
+
+  <section class="hero-section">
+    <div class="hero-badge">🚦 Powered by AI · 43 sign types</div>
+    <h1 class="hero-title">Identify Any Traffic Sign<br><span class="gradient-text">In Seconds</span></h1>
+    <p class="hero-sub">Take a photo of any road sign and our AI instantly tells you what it means — perfect for learners, drivers, and road safety researchers.</p>
+    <div class="hero-cta">
+      <button class="btn btn-primary btn-lg" id="btnHeroStart" type="button">Start scanning free →</button>
+      <p class="hero-note">No credit card required · Free forever</p>
+    </div>
+    <div class="hero-demo-card">
+      <div class="demo-label">HOW IT WORKS</div>
+      <div class="demo-steps">
+        <div class="demo-step"><div class="demo-num">1</div><p>Upload a photo of any traffic sign</p></div>
+        <div class="demo-arrow">→</div>
+        <div class="demo-step"><div class="demo-num">2</div><p>Our AI scans and identifies it</p></div>
+        <div class="demo-arrow">→</div>
+        <div class="demo-step"><div class="demo-num">3</div><p>Get the name, meaning &amp; confidence</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features-section">
+    <p class="section-label">What you get</p>
+    <h2 class="section-title">Everything you need to understand road signs</h2>
+    <div class="features-grid">
+      <article class="feat-card"><div class="feat-icon">🎯</div><h3>Instant Recognition</h3><p>Upload any traffic sign photo and our YOLOv8 AI model identifies it with up to 99% accuracy in under a second.</p></article>
+      <article class="feat-card"><div class="feat-icon">📖</div><h3>Reads the Text Too</h3><p>Our built-in text reader automatically extracts any numbers or words visible on the sign — like speed limits.</p></article>
+      <article class="feat-card"><div class="feat-icon">🗂️</div><h3>Scan History</h3><p>Every scan is saved to your history so you can review past results anytime without re-uploading.</p></article>
+      <article class="feat-card"><div class="feat-icon">🛡️</div><h3>43 Sign Types</h3><p>Trained on the official German Traffic Sign dataset — covering speed limits, warnings, prohibitions, and direction signs.</p></article>
+    </div>
+  </section>
+
+  <section class="stats-section">
+    <div class="stat-item"><span class="stat-num">43</span><span class="stat-desc">Sign types recognized</span></div>
+    <div class="stat-divider"></div>
+    <div class="stat-item"><span class="stat-num">99%</span><span class="stat-desc">Detection accuracy</span></div>
+    <div class="stat-divider"></div>
+    <div class="stat-item"><span class="stat-num">39k+</span><span class="stat-desc">Training images</span></div>
+    <div class="stat-divider"></div>
+    <div class="stat-item"><span class="stat-num">&lt;1s</span><span class="stat-desc">Average scan time</span></div>
+  </section>
+
+  <footer class="land-footer">
+    <p>© 2025 SignScan · Built with YOLOv8 + Tesseract OCR · GTSRB Dataset</p>
+  </footer>
+</div>
+
+<!-- ════════════════════ AUTH SCREEN ════════════════════ -->
+<div class="screen" id="screenAuth">
+  <div class="auth-layout">
+    <div class="auth-brand">
+      <div class="logo-mark">S</div>
+      <span class="auth-brand-name">SignScan</span>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div class="auth-card" id="formLogin">
+      <h2 class="auth-title">Welcome back</h2>
+      <p class="auth-sub">Log in to your account to start scanning.</p>
+
+      <!-- Google button container -->
+      <div id="googleBtnLogin" class="google-btn-wrap"></div>
+      <div class="auth-divider" id="loginDivider" style="display:none"><span>or continue with email</span></div>
+
+      <div class="form-group">
+        <label for="loginUsername">Username</label>
+        <input type="text" id="loginUsername" class="form-input" placeholder="your username" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <div class="form-error hidden" id="loginError"></div>
+      <div class="form-success hidden" id="loginSuccess"></div>
+      <button class="btn btn-primary btn-full" id="btnLogin" type="button">Log in</button>
+      <p class="auth-switch">Don't have an account? <button class="link-btn" id="btnSwitchRegister" type="button">Create one free</button></p>
+      <button class="link-btn auth-back" id="btnAuthBackLogin" type="button">← Back to home</button>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div class="auth-card hidden" id="formRegister">
+      <h2 class="auth-title">Create your account</h2>
+      <p class="auth-sub">Free forever · No credit card needed</p>
+
+      <!-- Google button container -->
+      <div id="googleBtnRegister" class="google-btn-wrap"></div>
+      <div class="auth-divider" id="registerDivider" style="display:none"><span>or sign up with email</span></div>
+
+      <div class="form-group">
+        <label for="regUsername">Choose a username</label>
+        <input type="text" id="regUsername" class="form-input" placeholder="e.g. piyush123" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label for="regPassword">Create a password</label>
+        <input type="password" id="regPassword" class="form-input" placeholder="Min 8 chars, number &amp; special char" autocomplete="new-password">
+        <p class="pw-hint">8+ characters · at least one number · at least one special character (!@#$%…)</p>
+      </div>
+      <div class="form-error hidden" id="registerError"></div>
+      <button class="btn btn-primary btn-full" id="btnRegister" type="button">Create account</button>
+      <p class="auth-switch">Already have an account? <button class="link-btn" id="btnSwitchLogin" type="button">Log in</button></p>
+      <button class="link-btn auth-back" id="btnAuthBackRegister" type="button">← Back to home</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ APP SCREEN ════════════════════ -->
+<div class="screen" id="screenApp">
+  <header class="app-nav">
+    <div class="land-logo">
+      <div class="logo-mark">S</div>
+      <span>SignScan</span>
+    </div>
+    <nav class="app-nav-tabs">
+      <button class="tab-btn active" data-tab="scan" id="tabScan" type="button">Scan a Sign</button>
+      <button class="tab-btn" data-tab="history" id="tabHistory" type="button">My Scans</button>
+    </nav>
+    <div class="app-nav-right">
+      <span class="user-greeting" id="userGreeting">👋 Hello!</span>
+      <button class="btn btn-ghost btn-sm" id="btnLogout" type="button">Log out</button>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <!-- SCAN TAB -->
+    <div class="tab-panel active" id="panelScan">
+      <div class="scan-state" id="stateUpload">
+        <div class="scan-hero">
+          <h1 class="scan-title">Scan a Traffic Sign</h1>
+          <p class="scan-sub">Upload a clear photo of any traffic sign and we'll identify it instantly.</p>
+        </div>
+        <div class="upload-area" id="uploadArea" role="button" tabindex="0" aria-label="Upload a traffic sign photo">
+          <div class="upload-icon" aria-hidden="true">📷</div>
+          <p class="upload-title">Drop your image here</p>
+          <p class="upload-hint">or <span class="upload-link">click to browse</span></p>
+          <p class="upload-types">JPG, PNG, BMP, WebP, PPM — up to 50 MB</p>
+        </div>
+        <input type="file" id="fileInput" accept="image/*,.ppm" hidden>
+        <div class="tips-row">
+          <div class="tip"><span>✓</span> Use a clear, well-lit photo</div>
+          <div class="tip"><span>✓</span> Keep the sign visible and centred</div>
+          <div class="tip"><span>✓</span> Avoid blurry or distant shots</div>
+        </div>
+      </div>
+
+      <div class="scan-state hidden" id="statePreview">
+        <div class="preview-layout">
+          <div class="preview-img-wrap">
+            <img id="previewImg" alt="Your selected sign photo">
+            <button class="preview-change" id="btnChangeImage" type="button">Change photo</button>
+          </div>
+          <div class="preview-actions">
+            <h2>Ready to scan</h2>
+            <p id="previewName" class="preview-filename"></p>
+            <p id="previewSz" class="preview-filesize"></p>
+            <button class="btn btn-primary btn-lg" id="btnScan" type="button">🔍 Scan this sign</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="scan-state hidden" id="stateProcessing">
+        <div class="processing-center">
+          <div class="pulse-ring" aria-hidden="true"><div class="pulse-inner"></div></div>
+          <h2>Scanning your sign…</h2>
+          <p class="processing-sub">Our AI is identifying the sign and reading any text on it.</p>
+          <div class="progress-steps">
+            <div class="ps" id="ps1"><span class="ps-dot"></span><span>Reading your photo</span></div>
+            <div class="ps" id="ps2"><span class="ps-dot"></span><span>Detecting the sign</span></div>
+            <div class="ps" id="ps3"><span class="ps-dot"></span><span>Reading visible text</span></div>
+            <div class="ps" id="ps4"><span class="ps-dot"></span><span>Preparing your result</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="scan-state hidden" id="stateResult">
+        <div class="result-wrap">
+          <div class="result-banner" id="resultBanner">
+            <div class="banner-text">
+              <p class="banner-found" id="bannerFound">We found 1 sign</p>
+              <p class="banner-top" id="bannerTop"></p>
+            </div>
+            <div class="banner-actions">
+              <button class="btn btn-outline" id="btnScanAnother" type="button">Scan another →</button>
+              <button class="btn btn-ghost btn-sm" id="btnDownloadResult" type="button">⬇ Save image</button>
+            </div>
+          </div>
+          <div class="detections-section">
+            <div class="detected-cards" id="detectedCards"></div>
+            <div class="no-sign hidden" id="noSign">
+              <div class="no-sign-icon">🔍</div>
+              <h3>No traffic signs detected</h3>
+              <p>Make sure the sign is clearly visible, well-lit, and close to the camera. Try a different photo.</p>
+              <button class="btn btn-primary" id="btnTryAgain" type="button">Try another photo</button>
+            </div>
+          </div>
+          <div class="result-image-wrap" id="resultImageWrap">
+            <div class="result-image-header">
+              <h3>Annotated photo</h3>
+              <div class="img-toggle-wrap">
+                <button class="tog active" id="togAnnotated" type="button">Annotated</button>
+                <button class="tog" id="togOriginal" type="button">Original</button>
+              </div>
+            </div>
+            <img id="resultImg" alt="Your sign with detection overlay" class="result-img">
+          </div>
+          <div class="ocr-wrap hidden" id="ocrWrap">
+            <h3>Text we read on the sign</h3>
+            <div class="ocr-text" id="ocrText"></div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /panelScan -->
+
+    <!-- HISTORY TAB -->
+    <div class="tab-panel hidden" id="panelHistory">
+      <div class="history-header">
+        <div>
+          <h2>Your Scan History</h2>
+          <p class="history-sub">Your recent sign scans, saved on this device.</p>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="btnClearHistory" type="button">Clear all</button>
+      </div>
+      <div class="history-grid" id="historyGrid"></div>
+      <div class="history-empty hidden" id="historyEmpty">
+        <div class="empty-icon">📷</div>
+        <h3>No scans yet</h3>
+        <p>Your scan results will appear here after you analyze your first sign.</p>
+        <button class="btn btn-primary" id="btnGoScan" type="button">Scan your first sign</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
+<script src="/static/js/app.js"></script>
+</body>
+</html>
