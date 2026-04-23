@@ -25,7 +25,7 @@
                 <a href="#" onclick="navigate('contact')" class="nav-link">Contact</a>
             </div>
             <div class="nav-actions">
-                <button id="navDashboardBtn" onclick="navigate('app')" class="btn-outline hidden">Dashboard</button>
+                <button id="navDashboardBtn" onclick="navigate('app')" class="btn-outline hidden"><span id="navUsernameDisplay">Dashboard</span></button>
                 <button id="navLoginBtn" onclick="navigate('auth')" class="btn-glow">Sign In</button>
                 <button id="navLogoutBtn" onclick="logout()" class="btn-outline hidden">Log Out</button>
             </div>
@@ -119,7 +119,7 @@
             <div class="auth-container fade-up">
                 <!-- Login -->
                 <div id="formLogin" class="glass-card auth-card">
-                    <h2 class="card-title">Welcome Back</h2>
+                    <h2 class="card-title text-2xl font-medium mb-2">Welcome Back</h2>
                     <p class="text-muted mb-6">Log in to your account</p>
                     <div id="googleBtnLogin" class="mb-4"></div>
                     <div class="auth-divider"><span>or email</span></div>
@@ -140,7 +140,7 @@
 
                 <!-- Register -->
                 <div id="formRegister" class="glass-card auth-card hidden">
-                    <h2 class="card-title">Create Account</h2>
+                    <h2 class="card-title text-2xl font-medium mb-2">Create Account</h2>
                     <p class="text-muted mb-6">Join SignScan today</p>
                     
                     <div class="form-group">
@@ -162,29 +162,59 @@
         <!-- ── APP/DASHBOARD SCREEN ── -->
         <div id="screen-app" class="screen hidden">
             <div class="dashboard-layout fade-up">
-                <aside class="dashboard-sidebar glass-card">
-                    <button class="tab-btn active" onclick="switchAppTab('scan')">Scanner</button>
-                    <button class="tab-btn" onclick="switchAppTab('history')">History</button>
-                    <button class="tab-btn" onclick="switchAppTab('profile')">Profile</button>
-                </aside>
+                
+                <!-- Profile Header replaces the old sidebar -->
+                <div class="glass-card mb-6 profile-header flex flex-wrap justify-between items-center gap-4">
+                    <div>
+                        <h2 class="text-3xl font-medium tracking-tight">Hi, <span id="profUsernameHeading" class="highlight">User</span></h2>
+                        <p class="text-muted mt-1">Account: <span class="capitalize text-white" id="profTypeHeader"></span> &nbsp;•&nbsp; Joined: <span class="text-white" id="profJoinedHeader"></span></p>
+                    </div>
+                    <div id="changePasswordSectionBtn">
+                        <button onclick="$('changePasswordModal').classList.toggle('hidden')" class="btn-outline text-sm">Change Password</button>
+                    </div>
+                </div>
+
+                <!-- Password Change Dropdown -->
+                <div id="changePasswordModal" class="glass-card mb-6 hidden border border-primary/30">
+                    <h3 class="text-lg font-medium mb-4">Update Password</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-group mb-0">
+                            <input type="password" id="cpOld" class="input-glass" placeholder="Current Password">
+                        </div>
+                        <div class="form-group mb-0">
+                            <input type="password" id="cpNew" class="input-glass" placeholder="New Password">
+                        </div>
+                    </div>
+                    <div id="cpError" class="alert-error hidden mt-4"></div>
+                    <div id="cpSuccess" class="alert-success hidden mt-4"></div>
+                    <button id="btnChangePassword" class="btn-primary mt-4">Save Password</button>
+                </div>
+
+                <!-- Tabs -->
+                <div class="flex gap-4 mb-6">
+                     <button class="tab-btn active flex-1 text-center py-3" onclick="switchAppTab('scan')">Scanner</button>
+                     <button class="tab-btn flex-1 text-center py-3" onclick="switchAppTab('history')">History</button>
+                </div>
                 
                 <div class="dashboard-content">
                     <!-- Scan Tab -->
                     <div id="tab-scan" class="app-tab active">
                         <div class="glass-card">
-                            <h2 class="card-title mb-4">Analyze Traffic Sign</h2>
+                            <h2 class="text-2xl font-medium mb-4">Analyze Traffic Sign</h2>
                             <div class="upload-area" id="uploadArea">
                                 <p class="text-muted">Drag & drop image here or <span class="highlight cursor-pointer" id="btnBrowse">browse</span></p>
                                 <input type="file" id="fileInput" class="hidden" accept="image/*">
                             </div>
                             <div id="previewContainer" class="hidden mt-4 text-center">
-                                <img id="imagePreview" class="max-w-xs mx-auto rounded-lg border border-white/10" src="" alt="Preview">
+                                <img id="imagePreview" class="max-w-md w-full mx-auto rounded-lg border border-white/10" src="" alt="Preview">
                                 <button id="btnScan" class="btn-primary mt-4 px-8">Scan Image</button>
+                                <button onclick="resetScan()" class="btn-outline mt-4 px-8 ml-2">Cancel</button>
                             </div>
                             <div id="scanResult" class="mt-6 hidden">
-                                <div class="glass-card bg-white/5 border-primary/30">
-                                    <h3 class="text-xl text-primary font-medium" id="resClass">Stop Sign</h3>
-                                    <p class="text-muted mt-1" id="resConf">Confidence: 98%</p>
+                                <div class="glass-card bg-white/5 border-primary/30 text-center">
+                                    <p class="text-sm text-muted uppercase tracking-widest mb-1">Detection Result</p>
+                                    <h3 class="text-3xl text-primary font-medium" id="resClass">Stop Sign</h3>
+                                    <p class="text-muted mt-2" id="resConf">Confidence: 98%</p>
                                 </div>
                             </div>
                         </div>
@@ -193,34 +223,9 @@
                     <!-- History Tab -->
                     <div id="tab-history" class="app-tab hidden">
                         <div class="glass-card">
-                            <h2 class="card-title mb-4">Recent Scans</h2>
+                            <h2 class="text-2xl font-medium mb-4">Recent Scans</h2>
                             <div id="historyList" class="space-y-4">
                                 <!-- Populated by JS -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Profile Tab -->
-                    <div id="tab-profile" class="app-tab hidden">
-                        <div class="glass-card max-w-lg">
-                            <h2 class="card-title mb-6">Your Profile</h2>
-                            <div class="space-y-4 mb-8">
-                                <div><span class="text-muted text-sm">Username:</span> <div id="profUsername" class="text-lg"></div></div>
-                                <div><span class="text-muted text-sm">Account Type:</span> <div id="profType" class="text-lg capitalize"></div></div>
-                                <div><span class="text-muted text-sm">Joined:</span> <div id="profJoined" class="text-lg"></div></div>
-                            </div>
-
-                            <div id="changePasswordSection" class="border-t border-white/10 pt-6">
-                                <h3 class="text-lg font-medium mb-4">Change Password</h3>
-                                <div class="form-group">
-                                    <input type="password" id="cpOld" class="input-glass" placeholder="Current Password">
-                                </div>
-                                <div class="form-group">
-                                    <input type="password" id="cpNew" class="input-glass" placeholder="New Password">
-                                </div>
-                                <div id="cpError" class="alert-error hidden"></div>
-                                <div id="cpSuccess" class="alert-success hidden"></div>
-                                <button id="btnChangePassword" class="btn-outline w-full mt-2">Update Password</button>
                             </div>
                         </div>
                     </div>

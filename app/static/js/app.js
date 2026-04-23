@@ -172,11 +172,13 @@ function checkToken() {
     $('navLoginBtn').classList.add('hidden');
     $('navLogoutBtn').classList.remove('hidden');
     $('navDashboardBtn').classList.remove('hidden');
+    $('navUsernameDisplay').textContent = u; // Replace 'Dashboard' with Username
   } else {
     currentUser = null;
     $('navLoginBtn').classList.remove('hidden');
     $('navLogoutBtn').classList.add('hidden');
     $('navDashboardBtn').classList.add('hidden');
+    $('navUsernameDisplay').textContent = 'Dashboard';
   }
 }
 
@@ -239,16 +241,17 @@ async function handleRegister() {
   btn.textContent = "Create Account"; btn.disabled = false;
 }
 
-// Profile
+// Profile Header
 function loadProfile() {
-  $('profUsername').textContent = localStorage.getItem("username") || "Unknown";
-  $('profType').textContent = localStorage.getItem("account_type") || "Local";
-  $('profJoined').textContent = localStorage.getItem("join_date") || "Unknown";
+  $('profUsernameHeading').textContent = localStorage.getItem("username") || "User";
+  $('profTypeHeader').textContent = localStorage.getItem("account_type") || "Local";
+  $('profJoinedHeader').textContent = localStorage.getItem("join_date") || "Unknown";
   
   if(localStorage.getItem("account_type") === "google") {
-    $('changePasswordSection').classList.add('hidden');
+    $('changePasswordSectionBtn').classList.add('hidden');
+    $('changePasswordModal').classList.add('hidden');
   } else {
-    $('changePasswordSection').classList.remove('hidden');
+    $('changePasswordSectionBtn').classList.remove('hidden');
   }
 }
 
@@ -271,17 +274,27 @@ async function handleChangePassword() {
     if(res.ok) {
       suc.textContent = "Password updated successfully."; suc.classList.remove('hidden');
       $('cpOld').value = ''; $('cpNew').value = '';
+      setTimeout(() => $('changePasswordModal').classList.add('hidden'), 2000);
     } else {
       err.textContent = data.error || "Failed"; err.classList.remove('hidden');
     }
   } catch(e) { err.textContent = "Network error"; err.classList.remove('hidden'); }
-  btn.textContent = "Update Password"; btn.disabled = false;
+  btn.textContent = "Save Password"; btn.disabled = false;
 }
 
 // Scanner
 let selectedFile = null;
+
+window.resetScan = () => {
+    selectedFile = null;
+    $('uploadArea').classList.remove('hidden');
+    $('previewContainer').classList.add('hidden');
+    $('scanResult').classList.add('hidden');
+    $('fileInput').value = '';
+};
+
 function handleFileSelect(e) {
-  const file = e.target.files ? e.target.files[0] : e.dataTransfer.files[0];
+  const file = e.target.files ? e.target.files[0] : e.dataTransfer?.files[0];
   if(!file) return;
   selectedFile = file;
   $('uploadArea').classList.add('hidden');
@@ -301,22 +314,39 @@ async function handleScan() {
   formData.append("file", selectedFile);
   
   try {
-    const res = await fetch("/api/analyze", { method: "POST", body: formData });
+    // FIX: ADDED AUTHORIZATION HEADER
+    const res = await fetch("/api/analyze", { 
+        method: "POST", 
+        body: formData,
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("auth_token")}`
+        }
+    });
+    
+    if (res.status === 401) {
+        alert("Session expired. Please log in again.");
+        logout();
+        return;
+    }
+    
     const data = await res.json();
-    if(res.ok && data.predictions && data.predictions.length > 0) {
-      const best = data.predictions[0];
+    
+    // FIX: LOOK FOR 'detections' instead of 'predictions'
+    if(res.ok && data.detections && data.detections.length > 0) {
+      const best = data.detections[0];
       $('resClass').textContent = best.class_name;
       $('resConf').textContent = `Confidence: ${(best.confidence * 100).toFixed(1)}%`;
       $('scanResult').classList.remove('hidden');
       saveHistory(best, $('imagePreview').src);
     } else {
-      alert("No sign detected or error occurred.");
+      $('resClass').textContent = "No Sign Detected";
+      $('resConf').textContent = "Please try another image.";
+      $('scanResult').classList.remove('hidden');
     }
-  } catch(e) { alert("Network error during scan."); }
-  btn.textContent = "Scan Again"; btn.disabled = false;
-  $('uploadArea').classList.remove('hidden');
-  $('previewContainer').classList.add('hidden');
-  selectedFile = null;
+  } catch(e) { 
+      alert("Network error during scan."); 
+  }
+  btn.textContent = "Scan Image"; btn.disabled = false;
 }
 
 // History
@@ -331,15 +361,15 @@ function loadHistory() {
   const hist = JSON.parse(localStorage.getItem("scan_history") || "[]");
   const list = $('historyList');
   if(hist.length === 0) {
-    list.innerHTML = '<p class="text-muted">No recent scans found.</p>';
+    list.innerHTML = '<p class="text-muted text-center py-8">No recent scans found.</p>';
     return;
   }
   list.innerHTML = hist.map(h => `
-    <div class="glass-card flex gap-4 p-4 items-center">
-      <img src="${h.imgUrl}" class="w-16 h-16 object-cover rounded-md border border-white/10">
+    <div class="glass-card flex gap-4 p-4 items-center mb-4 border border-white/5 bg-white/5">
+      <img src="${h.imgUrl}" class="w-20 h-20 object-cover rounded-md border border-white/10">
       <div>
-        <h4 class="text-primary font-medium text-lg">${h.result.class_name}</h4>
-        <p class="text-muted text-sm">${(h.result.confidence * 100).toFixed(1)}% confidence • ${h.date}</p>
+        <h4 class="text-primary font-medium text-xl">${h.result.class_name}</h4>
+        <p class="text-muted text-sm mt-1">${(h.result.confidence * 100).toFixed(1)}% confidence • ${h.date}</p>
       </div>
     </div>
   `).join('');
@@ -354,8 +384,10 @@ function bindEvents() {
   
   const drop = $('uploadArea');
   drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('dragover'); });
-  drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
+  drop.addEventListener('dragleave', () => drop.classList.remove('dragover'); });
   drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('dragover'); handleFileSelect(e); });
-  $('btnBrowse').addEventListener('click', () => $('fileInput').click());
+  
+  // Also make the whole upload area clickable
+  $('uploadArea').addEventListener('click', () => $('fileInput').click());
   $('fileInput').addEventListener('change', handleFileSelect);
 }

@@ -27,7 +27,7 @@ HTML_CONTENT = r"""<!DOCTYPE html>
                 <a href="#" onclick="navigate('contact')" class="nav-link">Contact</a>
             </div>
             <div class="nav-actions">
-                <button id="navDashboardBtn" onclick="navigate('app')" class="btn-outline hidden">Dashboard</button>
+                <button id="navDashboardBtn" onclick="navigate('app')" class="btn-outline hidden"><span id="navUsernameDisplay">Dashboard</span></button>
                 <button id="navLoginBtn" onclick="navigate('auth')" class="btn-glow">Sign In</button>
                 <button id="navLogoutBtn" onclick="logout()" class="btn-outline hidden">Log Out</button>
             </div>
@@ -121,7 +121,7 @@ HTML_CONTENT = r"""<!DOCTYPE html>
             <div class="auth-container fade-up">
                 <!-- Login -->
                 <div id="formLogin" class="glass-card auth-card">
-                    <h2 class="card-title">Welcome Back</h2>
+                    <h2 class="card-title text-2xl font-medium mb-2">Welcome Back</h2>
                     <p class="text-muted mb-6">Log in to your account</p>
                     <div id="googleBtnLogin" class="mb-4"></div>
                     <div class="auth-divider"><span>or email</span></div>
@@ -142,7 +142,7 @@ HTML_CONTENT = r"""<!DOCTYPE html>
 
                 <!-- Register -->
                 <div id="formRegister" class="glass-card auth-card hidden">
-                    <h2 class="card-title">Create Account</h2>
+                    <h2 class="card-title text-2xl font-medium mb-2">Create Account</h2>
                     <p class="text-muted mb-6">Join SignScan today</p>
                     
                     <div class="form-group">
@@ -164,29 +164,59 @@ HTML_CONTENT = r"""<!DOCTYPE html>
         <!-- ── APP/DASHBOARD SCREEN ── -->
         <div id="screen-app" class="screen hidden">
             <div class="dashboard-layout fade-up">
-                <aside class="dashboard-sidebar glass-card">
-                    <button class="tab-btn active" onclick="switchAppTab('scan')">Scanner</button>
-                    <button class="tab-btn" onclick="switchAppTab('history')">History</button>
-                    <button class="tab-btn" onclick="switchAppTab('profile')">Profile</button>
-                </aside>
+                
+                <!-- Profile Header replaces the old sidebar -->
+                <div class="glass-card mb-6 profile-header flex flex-wrap justify-between items-center gap-4">
+                    <div>
+                        <h2 class="text-3xl font-medium tracking-tight">Hi, <span id="profUsernameHeading" class="highlight">User</span></h2>
+                        <p class="text-muted mt-1">Account: <span class="capitalize text-white" id="profTypeHeader"></span> &nbsp;•&nbsp; Joined: <span class="text-white" id="profJoinedHeader"></span></p>
+                    </div>
+                    <div id="changePasswordSectionBtn">
+                        <button onclick="$('changePasswordModal').classList.toggle('hidden')" class="btn-outline text-sm">Change Password</button>
+                    </div>
+                </div>
+
+                <!-- Password Change Dropdown -->
+                <div id="changePasswordModal" class="glass-card mb-6 hidden border border-primary/30">
+                    <h3 class="text-lg font-medium mb-4">Update Password</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-group mb-0">
+                            <input type="password" id="cpOld" class="input-glass" placeholder="Current Password">
+                        </div>
+                        <div class="form-group mb-0">
+                            <input type="password" id="cpNew" class="input-glass" placeholder="New Password">
+                        </div>
+                    </div>
+                    <div id="cpError" class="alert-error hidden mt-4"></div>
+                    <div id="cpSuccess" class="alert-success hidden mt-4"></div>
+                    <button id="btnChangePassword" class="btn-primary mt-4">Save Password</button>
+                </div>
+
+                <!-- Tabs -->
+                <div class="flex gap-4 mb-6">
+                     <button class="tab-btn active flex-1 text-center py-3" onclick="switchAppTab('scan')">Scanner</button>
+                     <button class="tab-btn flex-1 text-center py-3" onclick="switchAppTab('history')">History</button>
+                </div>
                 
                 <div class="dashboard-content">
                     <!-- Scan Tab -->
                     <div id="tab-scan" class="app-tab active">
                         <div class="glass-card">
-                            <h2 class="card-title mb-4">Analyze Traffic Sign</h2>
+                            <h2 class="text-2xl font-medium mb-4">Analyze Traffic Sign</h2>
                             <div class="upload-area" id="uploadArea">
                                 <p class="text-muted">Drag & drop image here or <span class="highlight cursor-pointer" id="btnBrowse">browse</span></p>
                                 <input type="file" id="fileInput" class="hidden" accept="image/*">
                             </div>
                             <div id="previewContainer" class="hidden mt-4 text-center">
-                                <img id="imagePreview" class="max-w-xs mx-auto rounded-lg border border-white/10" src="" alt="Preview">
+                                <img id="imagePreview" class="max-w-md w-full mx-auto rounded-lg border border-white/10" src="" alt="Preview">
                                 <button id="btnScan" class="btn-primary mt-4 px-8">Scan Image</button>
+                                <button onclick="resetScan()" class="btn-outline mt-4 px-8 ml-2">Cancel</button>
                             </div>
                             <div id="scanResult" class="mt-6 hidden">
-                                <div class="glass-card bg-white/5 border-primary/30">
-                                    <h3 class="text-xl text-primary font-medium" id="resClass">Stop Sign</h3>
-                                    <p class="text-muted mt-1" id="resConf">Confidence: 98%</p>
+                                <div class="glass-card bg-white/5 border-primary/30 text-center">
+                                    <p class="text-sm text-muted uppercase tracking-widest mb-1">Detection Result</p>
+                                    <h3 class="text-3xl text-primary font-medium" id="resClass">Stop Sign</h3>
+                                    <p class="text-muted mt-2" id="resConf">Confidence: 98%</p>
                                 </div>
                             </div>
                         </div>
@@ -195,34 +225,9 @@ HTML_CONTENT = r"""<!DOCTYPE html>
                     <!-- History Tab -->
                     <div id="tab-history" class="app-tab hidden">
                         <div class="glass-card">
-                            <h2 class="card-title mb-4">Recent Scans</h2>
+                            <h2 class="text-2xl font-medium mb-4">Recent Scans</h2>
                             <div id="historyList" class="space-y-4">
                                 <!-- Populated by JS -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Profile Tab -->
-                    <div id="tab-profile" class="app-tab hidden">
-                        <div class="glass-card max-w-lg">
-                            <h2 class="card-title mb-6">Your Profile</h2>
-                            <div class="space-y-4 mb-8">
-                                <div><span class="text-muted text-sm">Username:</span> <div id="profUsername" class="text-lg"></div></div>
-                                <div><span class="text-muted text-sm">Account Type:</span> <div id="profType" class="text-lg capitalize"></div></div>
-                                <div><span class="text-muted text-sm">Joined:</span> <div id="profJoined" class="text-lg"></div></div>
-                            </div>
-
-                            <div id="changePasswordSection" class="border-t border-white/10 pt-6">
-                                <h3 class="text-lg font-medium mb-4">Change Password</h3>
-                                <div class="form-group">
-                                    <input type="password" id="cpOld" class="input-glass" placeholder="Current Password">
-                                </div>
-                                <div class="form-group">
-                                    <input type="password" id="cpNew" class="input-glass" placeholder="New Password">
-                                </div>
-                                <div id="cpError" class="alert-error hidden"></div>
-                                <div id="cpSuccess" class="alert-success hidden"></div>
-                                <button id="btnChangePassword" class="btn-outline w-full mt-2">Update Password</button>
                             </div>
                         </div>
                     </div>
@@ -298,12 +303,34 @@ button { font-family: inherit; cursor: pointer; border: none; outline: none; }
     box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
 }
 .btn-glow:hover { background: rgba(0,255,255,0.3); box-shadow: 0 0 25px rgba(0, 255, 255, 0.2); }
+.btn-glow:disabled, .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* Layout */
 .content-wrapper { padding-top: 80px; min-height: 100vh; position: relative; z-index: 10; }
 .screen { display: none; }
 .screen.active { display: block; }
 .hidden { display: none !important; }
+.flex { display: flex; }
+.flex-wrap { flex-wrap: wrap; }
+.justify-between { justify-content: space-between; }
+.items-center { align-items: center; }
+.gap-4 { gap: 16px; }
+.w-full { width: 100%; }
+.mt-1 { margin-top: 4px; }
+.mt-2 { margin-top: 8px; }
+.mt-4 { margin-top: 16px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-4 { margin-bottom: 16px; }
+.mb-6 { margin-bottom: 24px; }
+.text-center { text-align: center; }
+.text-sm { font-size: 14px; }
+.text-muted { color: var(--text-muted); }
+.capitalize { text-transform: capitalize; }
+.uppercase { text-transform: uppercase; }
+.tracking-widest { letter-spacing: 0.1em; }
+.space-y-4 > * + * { margin-top: 16px; }
+.grid { display: grid; }
+.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
 
 /* Typography */
 .hero-section { text-align: center; padding: 80px 24px; max-width: 800px; margin: 0 auto; }
@@ -316,7 +343,6 @@ button { font-family: inherit; cursor: pointer; border: none; outline: none; }
 .page-container { max-width: 1000px; margin: 0 auto; padding: 60px 24px; }
 .page-title { font-size: 3rem; font-weight: 500; text-align: center; }
 .page-text { font-size: 1.1rem; color: var(--text-muted); text-align: center; max-width: 700px; margin: 0 auto; line-height: 1.6; }
-.text-muted { color: var(--text-muted); }
 
 /* Cards & Glass */
 .glass-card {
@@ -334,8 +360,8 @@ button { font-family: inherit; cursor: pointer; border: none; outline: none; }
     color: white; padding: 14px 16px; border-radius: 12px; transition: border-color 0.2s;
 }
 .input-glass:focus { outline: none; border-color: var(--primary); }
-.alert-error { background: rgba(255,50,50,0.1); color: #ff6b6b; padding: 12px; border-radius: 8px; font-size: 14px; margin: 16px 0; border: 1px solid rgba(255,50,50,0.2); }
-.alert-success { background: rgba(50,255,100,0.1); color: #4ade80; padding: 12px; border-radius: 8px; font-size: 14px; margin: 16px 0; border: 1px solid rgba(50,255,100,0.2); }
+.alert-error { background: rgba(255,50,50,0.1); color: #ff6b6b; padding: 12px; border-radius: 8px; font-size: 14px; border: 1px solid rgba(255,50,50,0.2); }
+.alert-success { background: rgba(50,255,100,0.1); color: #4ade80; padding: 12px; border-radius: 8px; font-size: 14px; border: 1px solid rgba(50,255,100,0.2); }
 
 /* Auth */
 .auth-container { display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 80px); padding: 24px; }
@@ -345,14 +371,13 @@ button { font-family: inherit; cursor: pointer; border: none; outline: none; }
 .auth-divider span { padding: 0 16px; }
 
 /* Dashboard */
-.dashboard-layout { display: grid; grid-template-columns: 240px 1fr; gap: 32px; max-width: 1200px; margin: 40px auto; padding: 0 24px; }
-.dashboard-sidebar { padding: 24px; display: flex; flex-direction: column; gap: 8px; }
-.tab-btn { background: transparent; color: var(--text-muted); text-align: left; padding: 12px 16px; border-radius: 8px; font-weight: 500; transition: all 0.2s; }
-.tab-btn:hover { background: var(--glass-bg); color: white; }
-.tab-btn.active { background: rgba(0,255,255,0.1); color: var(--primary); }
+.dashboard-layout { max-width: 900px; margin: 40px auto; padding: 0 24px; }
+.tab-btn { background: var(--glass-bg); color: var(--text-muted); border: 1px solid var(--glass-border); border-radius: 12px; font-weight: 500; transition: all 0.2s; }
+.tab-btn:hover { background: rgba(255,255,255,0.05); color: white; }
+.tab-btn.active { background: var(--primary-dim); color: var(--primary); border-color: rgba(0, 255, 255, 0.3); }
 .app-tab { display: none; }
 .app-tab.active { display: block; }
-.upload-area { border: 2px dashed var(--glass-border); border-radius: 16px; padding: 48px 24px; text-align: center; transition: border-color 0.2s; }
+.upload-area { border: 2px dashed var(--glass-border); border-radius: 16px; padding: 48px 24px; text-align: center; transition: border-color 0.2s; cursor: pointer; }
 .upload-area:hover, .upload-area.dragover { border-color: var(--primary); background: rgba(0,255,255,0.02); }
 
 /* Animations */
@@ -362,11 +387,11 @@ button { font-family: inherit; cursor: pointer; border: none; outline: none; }
     to { opacity: 1; transform: translateY(0); }
 }
 
+@media (min-width: 768px) {
+    .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 @media (max-width: 768px) {
     .nav-links { display: none; }
-    .dashboard-layout { grid-template-columns: 1fr; }
-    .dashboard-sidebar { flex-direction: row; overflow-x: auto; }
-    .tab-btn { flex: 1; text-align: center; }
 }
 """
 
@@ -544,11 +569,13 @@ function checkToken() {
     $('navLoginBtn').classList.add('hidden');
     $('navLogoutBtn').classList.remove('hidden');
     $('navDashboardBtn').classList.remove('hidden');
+    $('navUsernameDisplay').textContent = u; // Replace 'Dashboard' with Username
   } else {
     currentUser = null;
     $('navLoginBtn').classList.remove('hidden');
     $('navLogoutBtn').classList.add('hidden');
     $('navDashboardBtn').classList.add('hidden');
+    $('navUsernameDisplay').textContent = 'Dashboard';
   }
 }
 
@@ -611,16 +638,17 @@ async function handleRegister() {
   btn.textContent = "Create Account"; btn.disabled = false;
 }
 
-// Profile
+// Profile Header
 function loadProfile() {
-  $('profUsername').textContent = localStorage.getItem("username") || "Unknown";
-  $('profType').textContent = localStorage.getItem("account_type") || "Local";
-  $('profJoined').textContent = localStorage.getItem("join_date") || "Unknown";
+  $('profUsernameHeading').textContent = localStorage.getItem("username") || "User";
+  $('profTypeHeader').textContent = localStorage.getItem("account_type") || "Local";
+  $('profJoinedHeader').textContent = localStorage.getItem("join_date") || "Unknown";
   
   if(localStorage.getItem("account_type") === "google") {
-    $('changePasswordSection').classList.add('hidden');
+    $('changePasswordSectionBtn').classList.add('hidden');
+    $('changePasswordModal').classList.add('hidden');
   } else {
-    $('changePasswordSection').classList.remove('hidden');
+    $('changePasswordSectionBtn').classList.remove('hidden');
   }
 }
 
@@ -643,17 +671,27 @@ async function handleChangePassword() {
     if(res.ok) {
       suc.textContent = "Password updated successfully."; suc.classList.remove('hidden');
       $('cpOld').value = ''; $('cpNew').value = '';
+      setTimeout(() => $('changePasswordModal').classList.add('hidden'), 2000);
     } else {
       err.textContent = data.error || "Failed"; err.classList.remove('hidden');
     }
   } catch(e) { err.textContent = "Network error"; err.classList.remove('hidden'); }
-  btn.textContent = "Update Password"; btn.disabled = false;
+  btn.textContent = "Save Password"; btn.disabled = false;
 }
 
 // Scanner
 let selectedFile = null;
+
+window.resetScan = () => {
+    selectedFile = null;
+    $('uploadArea').classList.remove('hidden');
+    $('previewContainer').classList.add('hidden');
+    $('scanResult').classList.add('hidden');
+    $('fileInput').value = '';
+};
+
 function handleFileSelect(e) {
-  const file = e.target.files ? e.target.files[0] : e.dataTransfer.files[0];
+  const file = e.target.files ? e.target.files[0] : e.dataTransfer?.files[0];
   if(!file) return;
   selectedFile = file;
   $('uploadArea').classList.add('hidden');
@@ -673,22 +711,39 @@ async function handleScan() {
   formData.append("file", selectedFile);
   
   try {
-    const res = await fetch("/api/analyze", { method: "POST", body: formData });
+    // FIX: ADDED AUTHORIZATION HEADER
+    const res = await fetch("/api/analyze", { 
+        method: "POST", 
+        body: formData,
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("auth_token")}`
+        }
+    });
+    
+    if (res.status === 401) {
+        alert("Session expired. Please log in again.");
+        logout();
+        return;
+    }
+    
     const data = await res.json();
-    if(res.ok && data.predictions && data.predictions.length > 0) {
-      const best = data.predictions[0];
+    
+    // FIX: LOOK FOR 'detections' instead of 'predictions'
+    if(res.ok && data.detections && data.detections.length > 0) {
+      const best = data.detections[0];
       $('resClass').textContent = best.class_name;
       $('resConf').textContent = `Confidence: ${(best.confidence * 100).toFixed(1)}%`;
       $('scanResult').classList.remove('hidden');
       saveHistory(best, $('imagePreview').src);
     } else {
-      alert("No sign detected or error occurred.");
+      $('resClass').textContent = "No Sign Detected";
+      $('resConf').textContent = "Please try another image.";
+      $('scanResult').classList.remove('hidden');
     }
-  } catch(e) { alert("Network error during scan."); }
-  btn.textContent = "Scan Again"; btn.disabled = false;
-  $('uploadArea').classList.remove('hidden');
-  $('previewContainer').classList.add('hidden');
-  selectedFile = null;
+  } catch(e) { 
+      alert("Network error during scan."); 
+  }
+  btn.textContent = "Scan Image"; btn.disabled = false;
 }
 
 // History
@@ -703,15 +758,15 @@ function loadHistory() {
   const hist = JSON.parse(localStorage.getItem("scan_history") || "[]");
   const list = $('historyList');
   if(hist.length === 0) {
-    list.innerHTML = '<p class="text-muted">No recent scans found.</p>';
+    list.innerHTML = '<p class="text-muted text-center py-8">No recent scans found.</p>';
     return;
   }
   list.innerHTML = hist.map(h => `
-    <div class="glass-card flex gap-4 p-4 items-center">
-      <img src="${h.imgUrl}" class="w-16 h-16 object-cover rounded-md border border-white/10">
+    <div class="glass-card flex gap-4 p-4 items-center mb-4 border border-white/5 bg-white/5">
+      <img src="${h.imgUrl}" class="w-20 h-20 object-cover rounded-md border border-white/10">
       <div>
-        <h4 class="text-primary font-medium text-lg">${h.result.class_name}</h4>
-        <p class="text-muted text-sm">${(h.result.confidence * 100).toFixed(1)}% confidence • ${h.date}</p>
+        <h4 class="text-primary font-medium text-xl">${h.result.class_name}</h4>
+        <p class="text-muted text-sm mt-1">${(h.result.confidence * 100).toFixed(1)}% confidence • ${h.date}</p>
       </div>
     </div>
   `).join('');
@@ -726,9 +781,11 @@ function bindEvents() {
   
   const drop = $('uploadArea');
   drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('dragover'); });
-  drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
+  drop.addEventListener('dragleave', () => drop.classList.remove('dragover'); });
   drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('dragover'); handleFileSelect(e); });
-  $('btnBrowse').addEventListener('click', () => $('fileInput').click());
+  
+  // Also make the whole upload area clickable
+  $('uploadArea').addEventListener('click', () => $('fileInput').click());
   $('fileInput').addEventListener('change', handleFileSelect);
 }
 """
@@ -742,7 +799,7 @@ def generate():
         f.write(CSS_CONTENT)
     with open('app/static/js/app.js', 'w', encoding='utf-8') as f:
         f.write(JS_CONTENT)
-    print("UI generation complete!")
+    print("UI generation complete! Models and profile layout fixed.")
 
 if __name__ == "__main__":
     generate()
